@@ -8,7 +8,7 @@ from app.database import engine, get_db  # ← add get_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # statup
+    # startup
     yield
 
     # shutdown
