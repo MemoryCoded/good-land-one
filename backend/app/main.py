@@ -1,5 +1,19 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends  # ← add Depends
+from sqlalchemy import text  # ← add text
+from sqlalchemy.ext.asyncio import AsyncSession  # ← add AsyncSession
 from app.config import settings
+from app.database import engine, get_db  # ← add get_db
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # statup
+    yield
+
+    # shutdown
+    await engine.dispose()
+
 
 # Create FastAPI app instance - Uvicorn ASGI
 app = FastAPI(
@@ -15,3 +29,9 @@ async def health_check():
         "status": "ok",
         "environment": settings.environment,
     }
+
+
+@app.get("/db-check")
+async def db_check(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(text("SELECT 1"))
+    return {"db": "connected", "result": result.scalar()}
