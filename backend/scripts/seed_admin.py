@@ -10,10 +10,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import bcrypt
-from sqlalchemy import select
+import bcrypt  # noqa: E402
+from sqlalchemy import select  # noqa: E402
 
-from app.config import settings
+from app.config import settings  # noqa: E402
 from app.database import AsyncSessionLocal
 from app.models import User
 
