@@ -17,3 +17,4 @@ asyncpg==0.30.0
 greenlet==3.1.1
 asyncpg==0.30.0
 greenlet==3.1.1
+bcrypt==4.2.1

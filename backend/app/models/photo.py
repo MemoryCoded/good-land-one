@@ -5,10 +5,12 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Text,
     Index,
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
@@ -21,41 +23,42 @@ class Photo(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Which collection it lives in
     collection_id: Mapped[int] = mapped_column(
         ForeignKey("collections.id"), nullable=False
     )
     position: Mapped[int] = mapped_column(nullable=False)
 
-    # Visibility flags
     is_archived: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     in_gallery: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    # Metadata
     title: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    description: Mapped[str | None] = mapped_column(String, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     artist_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    copyright_override: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    # Canvas
-    has_canvas: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    canvas_theme: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    canvas_overrides: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    view_b_background: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
-    # Files (R2 keys)
+    color_palette: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    info_toggles: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     thumbnail_small: Mapped[str] = mapped_column(String(255), nullable=False)
     thumbnail_medium: Mapped[str] = mapped_column(String(255), nullable=False)
     thumbnail_large: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    # Technical details
     mime_type: Mapped[str] = mapped_column(String(50), nullable=False)
     size_bytes: Mapped[int] = mapped_column(nullable=False)
     width: Mapped[int] = mapped_column(nullable=False)
     height: Mapped[int] = mapped_column(nullable=False)
 
-    # Dates
     date_taken: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    date_source: Mapped[str] = mapped_column(
+        String(20), default="taken", nullable=False
+    )
     uploaded_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
-    # E-commerce (dormant until feature flag enabled)
     print_available: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
@@ -63,11 +66,13 @@ class Photo(Base):
     edition_size: Mapped[int | None] = mapped_column(nullable=True)
     edition_number: Mapped[int | None] = mapped_column(nullable=True)
 
-    # Relationship
     collection: Mapped["Collection"] = relationship(
-        "Collection", back_populates="photos"
+        "Collection",
+        back_populates="photos",
+        foreign_keys=[collection_id],
     )
 
+    # Index may be redudant after unique constraint
     __table_args__ = (
         UniqueConstraint(
             "collection_id", "position", name="uq_photos_collection_position"

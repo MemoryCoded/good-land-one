@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     secret_key: str = ""
     admin_email: str = ""
-    admin_password_hash: str = ""
+    admin_password: str = ""
 
     sentry_dsn: str = ""
 
