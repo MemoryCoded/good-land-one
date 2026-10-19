@@ -10,6 +10,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
@@ -18,6 +19,9 @@ if TYPE_CHECKING:
     from app.models.collection import Collection
 
 
+# The Photo class is a SQLAlchemy model that represents a photo in the database. It defines the structure of the "photos" table, including columns for various attributes of a photo, such as title, description, artist name, filename, dimensions, and more. The class also establishes relationships with other models, such as the Collection model, and includes constraints and indexes to ensure data integrity and optimize query performance.
+# It inherits from the Base class, which is a declarative base provided by SQLAlchemy for defining models. The Photo class uses mapped_column to define the columns in the table, specifying data types, constraints, and default values. It also defines relationships with other models using the relationship function, allowing for easy navigation between related data in the database.
+# An orm is needed for database
 class Photo(Base):
     __tablename__ = "photos"
 
