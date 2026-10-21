@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession  # ← add AsyncSession
 from app.config import settings
 from app.database import engine, get_db  # ← add get_db
 from app.routes.photos import router as photos_router
+from app.routes.collections import router as collections_router
 
 
 @asynccontextmanager
@@ -26,6 +27,7 @@ app = FastAPI(
 
 # Register routers
 app.include_router(photos_router)
+app.include_router(collections_router)
 
 
 @app.get("/health")
