@@ -41,3 +41,6 @@ htmlcov/
 
 # Local uploads (dev only)
 uploads/
+
+# Notes
+landing-one.md
