@@ -15,7 +15,7 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
         style={{
           clipPath: isOpen
             ? "polygon(0 0, 100% 0, 100% 60%, 30% 60%, 20% 100%, 0 100%)"
-            : "polygon(0 0, 30% 0, 30% 60%, 30% 60%, 20% 100%, 0 100%)", // Only the tab remains
+            : "polygon(0 0, 30% 0, 30% 60%, 30% 100%, 20% 100%, 0 100%)", // Only the tab remains
 
           // 1. The Metallic Gradient (Manila colors)
           background:

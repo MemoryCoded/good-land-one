@@ -68,7 +68,13 @@ function PhotoRoute({ photos }: { photos: Photo[] }) {
   if (!selectedPhoto)
     return <div className="p-12 text-center">Photo not found</div>;
 
-  return <PhotoViewer photo={selectedPhoto} onClose={handleClose} />;
+  return (
+    <PhotoViewer
+      photos={photos}
+      currentPhotoId={Number(id)}
+      onClose={handleClose}
+    />
+  );
 }
 
 export default App;

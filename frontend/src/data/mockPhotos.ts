@@ -44,6 +44,6 @@ const aspects: ("square" | "tall" | "wide")[] = [
   "wide",
 ];
 
-export const MOCK_PHOTOS = Array.from({ length: 24 }).map((_, i) =>
+export const MOCK_PHOTOS = Array.from({ length: 50 }).map((_, i) =>
   generateMockPhoto(i + 1, aspects[i % aspects.length]),
 );

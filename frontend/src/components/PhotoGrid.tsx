@@ -62,6 +62,9 @@ export function PhotoGrid({
     1: "Droneshots",
     2: "Test Collection",
     3: "Landscapes",
+    4: "Natural World",
+    5: "Sights",
+    6: "Bridges",
   };
 
   useEffect(() => {
