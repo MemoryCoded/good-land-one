@@ -1,4 +1,5 @@
 import type { Photo } from "../types/photo";
+import { PolaroidCard } from "./PolaroidCard";
 
 interface PhotoViewerProps {
   photo: Photo;
@@ -6,54 +7,28 @@ interface PhotoViewerProps {
 }
 
 export function PhotoViewer({ photo, onClose }: PhotoViewerProps) {
-  const theme = photo.canvas_theme || "white";
-  const isDark = theme === "dark";
-  const imageUrl = `https://picsum.photos/seed/${photo.id}/1200/900`;
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4 sm:p-8">
+    <div
+      className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4 sm:p-8"
+      onClick={onClose} // Click background to close
+    >
       <button
         onClick={onClose}
-        className="absolute top-6 left-6 text-white/50 hover:text-white transition-colors text-lg"
+        className="absolute top-6 left-6 text-white/50 hover:text-white transition-colors text-lg z-50"
       >
-        ✕
+        ✕ Close
       </button>
 
-      {/* The Polaroid Frame */}
-      <div
-        className={`
-        relative w-full max-w-4xl p-4 pb-24 shadow-2xl transition-colors duration-500
-        ${isDark ? "bg-zinc-900 border border-zinc-700" : "bg-white"}
-      `}
-      >
-        <img
-          src={imageUrl}
-          alt={photo.title || ""}
-          className="w-full h-auto max-h-[70vh] object-contain"
-        />
-
-        {/* The Bottom Strip */}
-        <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-          <span
-            className={`text-xl font-bold tracking-widest ${
-              isDark ? "text-zinc-400" : "text-gray-900"
-            }`}
-          >
-            {photo.collection_id}.{photo.position}
-          </span>
-
-          <span
-            className={`text-sm font-bold tracking-widest uppercase ${
-              isDark ? "text-zinc-400" : "text-gray-900"
-            }`}
-          >
-            DroneShots / {photo.artist_name || "Artist"}
-          </span>
-        </div>
+      {/* Stop propagation so clicking the photo doesn't close it */}
+      <div onClick={(e) => e.stopPropagation()}>
+        <PolaroidCard photo={photo} isViewB={true} />
       </div>
 
       {/* Action Pill */}
-      <div className="mt-8 flex items-center gap-6 px-8 py-4 rounded-full bg-zinc-800/80 backdrop-blur-md text-white/70 border border-zinc-700/50 shadow-lg">
+      <div
+        className="mt-8 flex items-center gap-6 px-8 py-4 rounded-full bg-zinc-800/80 backdrop-blur-md text-white/70 border border-zinc-700/50 shadow-lg z-50"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           className="hover:text-white text-xl transition-colors"
           title="Share"
