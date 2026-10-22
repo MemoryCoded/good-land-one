@@ -11,11 +11,18 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full drop-shadow-md">
       <div
-        className="bg-[#f0230d] w-full h-24 flex relative transition-all duration-500 ease-in-out"
+        className="w-full h-24 flex relative transition-all duration-500 ease-in-out"
         style={{
           clipPath: isOpen
             ? "polygon(0 0, 100% 0, 100% 60%, 30% 60%, 20% 100%, 0 100%)"
             : "polygon(0 0, 30% 0, 30% 60%, 30% 60%, 20% 100%, 0 100%)", // Only the tab remains
+
+          // 1. The Metallic Gradient (Manila colors)
+          background:
+            "linear-gradient(135deg, #C5A86A 55%, #F5E6C4 25%, #E8D5A5 50%, #D4BA7A 85%, #B89B5E 100%)",
+          // 2. The Bevel Effect (Light on top, shadow on bottom)
+          boxShadow:
+            "inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.15)",
         }}
       >
         {/* Left Tab: Clickable to toggle */}
