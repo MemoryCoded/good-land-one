@@ -45,7 +45,7 @@ export function PolaroidCard({
         absolute font-bold tracking-widest font-orbitron
         ${
           isViewB
-            ? "bottom-6 left-6 text-xl"
+            ? "bottom-6 left-6 text-l"
             : "bottom-3 left-2 text-[clamp(0.5rem,1.5vw,0.75rem)]"
         }
         ${isDark ? "text-zinc-400" : "text-gray-900"}

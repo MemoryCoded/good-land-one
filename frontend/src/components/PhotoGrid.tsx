@@ -124,7 +124,13 @@ export function PhotoGrid({
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="cursor-pointer"
                 >
-                  <PolaroidCard photo={photo} />
+                  {/* NEW: Inner div for the hover pop */}
+                  <div
+                    className="transition-all duration-300 ease-out hover:-translate-y-0.5
+                                  hover:shadow-2xl hover:shadow-gray/50"
+                  >
+                    <PolaroidCard photo={photo} />
+                  </div>
                 </motion.div>
               ))}
             </motion.div>

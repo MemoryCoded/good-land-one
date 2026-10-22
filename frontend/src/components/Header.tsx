@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 interface ManilaHeaderProps {
   title: string;
@@ -47,16 +48,25 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
           }`}
         >
           <nav className="flex w-full justify-evenly text-sm font-semibold text-gray-200 font-orbitron">
-            <button className="hover:text-black transition-colors">
+            {/* Replace button with Link */}
+            <Link
+              to="/"
+              className="hover:text-black transition-colors drop-shadow-sm"
+            >
+              Library
+            </Link>
+            <button className="hover:text-black transition-colors drop-shadow-sm">
               Search
             </button>
-            <button className="hover:text-black transition-colors">
-              Select
+            <button className="hover:text-black transition-colors drop-shadow-sm">
+              Seek
             </button>
-            <button className="hover:text-black transition-colors">Seek</button>
-            <button className="hover:text-black transition-colors">
+            <Link
+              to="/collections"
+              className="hover:text-black transition-colors drop-shadow-sm"
+            >
               Collections
-            </button>
+            </Link>
           </nav>
         </div>
       </div>

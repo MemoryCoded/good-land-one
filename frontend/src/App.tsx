@@ -10,15 +10,14 @@ import { MOCK_PHOTOS } from "./data/mockPhotos";
 import { PhotoGrid } from "./components/PhotoGrid";
 import { PhotoViewer } from "./components/PhotoViewer";
 import { ManHeader } from "./components/Header";
+import { CollectionsPage } from "./pages/CollectionsPage";
 import type { Photo } from "./types/photo";
 
 function App() {
   const photos = MOCK_PHOTOS;
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // <-- Bring the steering wheel back
 
-  const [activeTitle, setActiveTitle] = useState(
-    "Virtual Gallery | Test Collection",
-  );
+  const [activeTitle, setActiveTitle] = useState("Archive.. | Test Collection");
   const [activeDate, setActiveDate] = useState("Oct 2026");
 
   return (
@@ -31,7 +30,7 @@ function App() {
           element={
             <PhotoGrid
               photos={photos}
-              // Capture the exact scroll Y position and pass it in the state
+              // FIXED: Actually navigate and save scroll position
               onPhotoClick={(photo) =>
                 navigate(`/photo/${photo.id}`, {
                   state: { scrollY: window.scrollY },
@@ -45,6 +44,9 @@ function App() {
           }
         />
 
+        <Route path="/collections" element={<CollectionsPage />} />
+
+        {/* FIXED: Passed photos and current ID to the Viewer */}
         <Route path="/photo/:id" element={<PhotoRoute photos={photos} />} />
       </Routes>
     </div>
@@ -56,17 +58,13 @@ function PhotoRoute({ photos }: { photos: Photo[] }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const selectedPhoto = photos.find((p) => p.id === Number(id));
-
   const handleClose = () => {
-    // Read the saved scrollY from location.state (fallback to 0 if not found)
+    // Read the saved scrollY from the state, or default to 0
     const savedScrollY = location.state?.scrollY || 0;
-    // Navigate back to root, passing the scroll position so the grid knows where to go
+
+    // Navigate back to root, passing the scroll position back
     navigate("/", { state: { restoreScrollY: savedScrollY }, replace: true });
   };
-
-  if (!selectedPhoto)
-    return <div className="p-12 text-center">Photo not found</div>;
 
   return (
     <PhotoViewer

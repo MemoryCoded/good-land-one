@@ -21,28 +21,30 @@ export function PhotoViewer({
   const currentIndex = photos.findIndex((p) => p.id === currentPhotoId);
   const photo = photos[currentIndex];
 
-  // 1. Auto-scroll the strip (Without the flash)
+  // 1. Auto-scroll to center (Fixed math for perfect centering)
   useEffect(() => {
     if (stripRef.current && currentIndex !== -1) {
-      const activeElement = stripRef.current.children[
-        currentIndex
-      ] as HTMLElement;
-      if (activeElement) {
-        // Calculate the center position
-        const scrollLeft =
-          activeElement.offsetLeft -
-          stripRef.current.offsetWidth / 2 +
-          activeElement.offsetWidth / 2;
+      const timer = setTimeout(() => {
+        const container = stripRef.current;
+        const activeElement = container?.children[currentIndex] as HTMLElement;
 
-        stripRef.current.scrollTo({
-          left: scrollLeft,
-          behavior: "smooth",
-        });
-      }
+        if (activeElement && container) {
+          const scrollPos =
+            activeElement.offsetLeft -
+            container.offsetWidth / 2 +
+            activeElement.offsetWidth / 2;
+          container.scrollTo({
+            left: scrollPos,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
     }
   }, [currentIndex]);
 
-  // 2. Prevent keyboard arrows from scrolling the page
+  // 2. Keyboard Navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") {
@@ -74,11 +76,8 @@ export function PhotoViewer({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden"
-      onClick={onClose}
-    >
-      {/* View B Close Button*/}
+    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden">
+      {/* View B Close Button (No background click to close anymore) */}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -86,17 +85,14 @@ export function PhotoViewer({
         }}
         className="absolute top-6 left-6 text-white/50 hover:text-white transition-colors text-sm font-bold tracking-widest uppercase z-50 font-space"
       >
-        ✕ Close
+        X Close
       </button>
 
       {/* MAIN PHOTO */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full flex justify-center flex-1 items-center mt-12"
-      >
+      <div className="w-full flex justify-center flex-1 items-center mt-12">
         <AnimatePresence mode="wait">
           <motion.div
-            key={photo.id} // Key on the photo ID triggers the animation
+            key={photo.id}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -118,10 +114,10 @@ export function PhotoViewer({
       {/* REEL STRIP */}
       <div
         ref={stripRef}
-        className="mt-6 w-full max-w-4xl flex justify-start sm:justify-center gap-2 overflow-x-auto px-4 py-4 no-scrollbar z-50 scroll-smooth"
-        onClick={(e) => e.stopPropagation()}
+        // Changed to justify-start, added mx-auto and space to prevent clipping
+        className="mt-8 w-full max-w-4xl flex justify-start gap-3 overflow-x-auto px-8 py-4 no-scrollbar z-50 scroll-smooth"
       >
-        {photos.map((p, index) => (
+        {photos.map((p) => (
           <div
             key={p.id}
             onClick={(e) => {
@@ -129,8 +125,9 @@ export function PhotoViewer({
               navigate(`/photo/${p.id}`);
             }}
             className={`w-10 h-14 flex-shrink-0 cursor-pointer transition-all duration-300 ${
-              p.id === photo.id
-                ? "ring-2 ring-white scale-110 opacity-100"
+              p.id === currentPhotoId
+                ? // Using ring instead of outline so it renders outside the box cleanly
+                  "ring-2 ring-white ring-offset-2 ring-offset-black scale-110 opacity-100 z-10 shadow-xl"
                 : "opacity-40 hover:opacity-80"
             }`}
           >
@@ -143,60 +140,60 @@ export function PhotoViewer({
         ))}
       </div>
 
-      {/* ACTION PILL & ARROWS */}
-      <div
-        className="mt-6 flex items-center gap-4 z-50 mb-4"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* ACTION PILL & ARROWS (Gravity applied) */}
+      <div className="mt-8 flex items-center gap-3 z-50 mb-4">
+        {/* View B Left Arrow */}
         <button
           onClick={prevPhoto}
           disabled={currentIndex === 0}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-800/80 text-white disabled:opacity-30 hover:bg-zinc-700 transition-colors"
+          className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-blue-600 transition-colors font-space text-lg"
         >
           ←
         </button>
 
-        <div className="flex items-center gap-6 px-8 py-4 rounded-full bg-zinc-800/80 backdrop-blur-md text-white shadow-lg border border-zinc-700/50">
+        {/* The Floating Items */}
+        <div className="flex items-center gap-3">
           <button
-            className="hover:text-white text-xl transition-colors font-space tracking-widest uppercase"
+            className="px-6 py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-sm"
             title="Share"
           >
             Outer
           </button>
 
-          <div className="flex gap-6 items-center">
-            <button
-              className="hover:text-white text-lg transition-colors"
-              title="Favorite"
-            >
-              ♡
-            </button>
-            <button
-              className="hover:text-white text-lg transition-colors font-sans font-bold font-space"
-              title="Info"
-            >
-              Label
-            </button>
-            <button
-              className="hover:text-white text-lg transition-colors"
-              title="Canvas"
-            >
-              ▣
-            </button>
-          </div>
+          <button
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-xl"
+            title="Favorite"
+          >
+            ♡
+          </button>
 
           <button
-            className="hover:text-red-400 text-lg transition-colors ml-4"
+            className="px-6 py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space font-bold text-sm tracking-widest"
+            title="Info"
+          >
+            LABEL
+          </button>
+
+          <button
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-xl"
+            title="Canvas Toggle"
+          >
+            ▣
+          </button>
+
+          <button
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:text-red-400 hover:bg-red-950 transition-colors ml-2 text-lg"
             title="Delete"
           >
             🗑
           </button>
         </div>
 
+        {/* View B Right Arrow */}
         <button
           onClick={nextPhoto}
           disabled={currentIndex === photos.length - 1}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-800/80 text-white disabled:opacity-30 hover:bg-zinc-700 transition-colors"
+          className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-red-600 transition-colors font-space text-lg"
         >
           →
         </button>
