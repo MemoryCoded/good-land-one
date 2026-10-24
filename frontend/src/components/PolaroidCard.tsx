@@ -34,9 +34,10 @@ export function PolaroidCard({
         src={imageUrl}
         alt={photo.title || "Gallery photo"}
         className={`w-full h-auto object-contain ${
-          isViewB ? "max-h-[70vh]" : ""
+          isViewB ? "max-h-[50vh]" : ""
         }`}
         loading="lazy"
+        draggable={false} // Stops Ghost Image (Default White arrow scroll)
       />
 
       {/* Bottom Left: Number */}
@@ -51,7 +52,7 @@ export function PolaroidCard({
         ${isDark ? "text-zinc-400" : "text-gray-900"}
       `}
       >
-        {"#" + photo.collection_id}.{photo.position}
+        {"CA " + photo.collection_id}.{photo.position}
       </span>
 
       {/* Bottom Right: Signature */}

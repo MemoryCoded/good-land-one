@@ -17,7 +17,9 @@ function App() {
   const photos = MOCK_PHOTOS;
   const navigate = useNavigate(); // <-- Bring the steering wheel back
 
-  const [activeTitle, setActiveTitle] = useState("Archive.. | Test Collection");
+  const [activeTitle, setActiveTitle] = useState(
+    "Virtual Gallery | Test Collection",
+  );
   const [activeDate, setActiveDate] = useState("Oct 2026");
 
   return (

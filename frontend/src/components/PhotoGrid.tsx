@@ -16,13 +16,16 @@ export function PhotoGrid({
   onPhotoClick,
   onCollectionVisible,
 }: PhotoGridProps) {
+  // Watches collection title when scrolling
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Grabs the current URL state (used to restore your scroll position when you close View B).
   const location = useLocation();
 
-  // 1. Grab the state from our Zustand whiteboard
+  // 1. Grab the state from Zustand whiteboard
   const { zoomLevel, zoomIn, zoomOut } = useGalleryStore();
 
-  // 2. Scroll Restoration (from the previous step)
+  // 2. Scroll Restoration (from the previous step (close B))
   useEffect(() => {
     if (location.state?.restoreScrollY !== undefined) {
       setTimeout(() => {
@@ -34,14 +37,28 @@ export function PhotoGrid({
     }
   }, [location.state]);
 
-  // 3. Listen for Cmd+Scroll (Mac) or Ctrl+Scroll (Windows)
+  // NEW: Create a ref to track the time of the last zoom
+  const lastZoomTime = useRef(0);
+
+  // ... (scroll restoration effect)
+
+  // UPDATED: The Wheel Listener with Cooldown
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // e.metaKey is Cmd on Mac, e.ctrlKey is Ctrl on Windows
       if (e.ctrlKey || e.metaKey) {
-        e.preventDefault(); // Stop the browser's default zoom
-        if (e.deltaY < 0) zoomOut(); // Scrolled up
-        if (e.deltaY > 0) zoomIn(); // Scrolled down
+        // No whole page zoom
+        e.preventDefault();
+
+        const now = Date.now();
+
+        // COOLDOWN: Only trigger zoom if 150ms have passed since the last zoom
+        if (now - lastZoomTime.current > 150) {
+          if (e.deltaY < 0) zoomOut(); // Scroll up ZUS
+          if (e.deltaY > 0) zoomIn(); // Scroll down
+
+          // Record the time of this zoom action
+          lastZoomTime.current = now;
+        }
       }
     };
     window.addEventListener("wheel", handleWheel, { passive: false });
@@ -67,6 +84,7 @@ export function PhotoGrid({
     6: "Bridges",
   };
 
+  // Observes collection-title
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -79,7 +97,8 @@ export function PhotoGrid({
           }
         });
       },
-      { rootMargin: "0px 0px -80% 0px" },
+      // Photos take up top 10 percent/ name change
+      { rootMargin: "0px 0px -90% 0px" },
     );
     const sections = document.querySelectorAll(".collection-section");
     sections.forEach((section) => observerRef.current?.observe(section));

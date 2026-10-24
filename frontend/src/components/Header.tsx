@@ -14,16 +14,30 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
       <div
         className="w-full h-24 flex relative transition-all duration-500 ease-in-out"
         style={{
+          // 0 0 = Top Left corner
+          // 100% 0 = Top Right corner
+          // 100% 60% = Go down the right edge 60% of the way
+          // 30% 60% = Move left to the 30% mark (creates the flat top of the right body)
+          // 20% 100% = Cut diagonally down to the 20% mark at the bottom (the slanted cut)
+          // 0 100% = Go to the Bottom Left corner
           clipPath: isOpen
-            ? "polygon(0 0, 100% 0, 100% 60%, 30% 60%, 20% 100%, 0 100%)"
-            : "polygon(0 0, 30% 0, 30% 60%, 30% 100%, 20% 100%, 0 100%)", // Only the tab remains
+            ? "polygon(0 0, 100% 0, 100% 63%, 30% 60%, 18% 100%, 0 100%)"
+            : "polygon(0 0, 30% 0, 30% 60%, 30% 100%, 20% 100%, 0 100%)",
+          // Only the tab remains
 
-          // 1. The Metallic Gradient (Manila colors)
+          // 135deg = Light shines diagonally from top-left to bottom-right
+          // 57% #C5A86A = Dark Gold (Start)
+          // 25% #F5E6C4 = Bright Highlight (Metallic shine)
+          // 50% #E8D5A5 = Base Manila Color (Middle)
+          // 85% #D4BA7A = Shadow Gold
+          // 100% #B89B5E = Deep Edge Shadow (End)
           background:
-            "linear-gradient(135deg, #C5A86A 55%, #F5E6C4 25%, #E8D5A5 50%, #D4BA7A 85%, #B89B5E 100%)",
-          // 2. The Bevel Effect (Light on top, shadow on bottom)
+            "linear-gradient(135deg, #838353 57%, #F5E6C4 25%, #E8D5A5 50%, #D4BA7A 85%, #B89B5E 100%)",
+
+          // inset 0 2px 3px white = Light shining on the top inside edge
+          // inset 0 -3px 5px black = Shadow on the bottom inside edge
           boxShadow:
-            "inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.15)",
+            "inset 0 3px 3px rgba(249, 248, 248, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.15)",
         }}
       >
         {/* Left Tab: Clickable to toggle */}
@@ -53,7 +67,7 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
               to="/"
               className="hover:text-black transition-colors drop-shadow-sm"
             >
-              Library
+              Gallery
             </Link>
             <button className="hover:text-black transition-colors drop-shadow-sm">
               Search

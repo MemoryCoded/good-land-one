@@ -18,10 +18,23 @@ export function PhotoViewer({
   const navigate = useNavigate();
   const stripRef = useRef<HTMLDivElement>(null);
 
+  // 1. Ref for the trackpad throttle
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const currentIndex = photos.findIndex((p) => p.id === currentPhotoId);
   const photo = photos[currentIndex];
 
-  // 1. Auto-scroll to center (Fixed math for perfect centering)
+  // 2. Define functions BEFORE the effects that use them
+  const nextPhoto = () => {
+    if (currentIndex < photos.length - 1)
+      navigate(`/photo/${photos[currentIndex + 1].id}`);
+  };
+
+  const prevPhoto = () => {
+    if (currentIndex > 0) navigate(`/photo/${photos[currentIndex - 1].id}`);
+  };
+
+  // 3. Auto-scroll the strip to center the active photo
   useEffect(() => {
     if (stripRef.current && currentIndex !== -1) {
       const timer = setTimeout(() => {
@@ -44,17 +57,16 @@ export function PhotoViewer({
     }
   }, [currentIndex]);
 
-  // 2. Keyboard Navigation
+  // 4. Keyboard Navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        if (currentIndex < photos.length - 1)
-          navigate(`/photo/${photos[currentIndex + 1].id}`);
+        nextPhoto();
       }
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        if (currentIndex > 0) navigate(`/photo/${photos[currentIndex - 1].id}`);
+        prevPhoto();
       }
       if (e.key === "Escape") {
         onClose();
@@ -64,20 +76,38 @@ export function PhotoViewer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentIndex, photos, navigate, onClose]);
 
+  // 5. Trackpad Horizontal Swipe
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      // Only triggers for horizontal swipe
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        e.preventDefault(); // Prevent whole page scroll
+
+        if (scrollTimeout.current) return; // Throttle
+
+        if (e.deltaX > 30) {
+          nextPhoto();
+        } else if (e.deltaX < -30) {
+          prevPhoto();
+        }
+
+        // Lock swipe for 400ms so it doesn't skip photos
+        scrollTimeout.current = setTimeout(() => {
+          scrollTimeout.current = null;
+        }, 400);
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [currentIndex, photos]);
+
+  // 6. NOW it is safe to do an early return
   if (!photo) return null;
 
-  const nextPhoto = () => {
-    if (currentIndex < photos.length - 1)
-      navigate(`/photo/${photos[currentIndex + 1].id}`);
-  };
-
-  const prevPhoto = () => {
-    if (currentIndex > 0) navigate(`/photo/${photos[currentIndex - 1].id}`);
-  };
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden">
-      {/* View B Close Button (No background click to close anymore) */}
+    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden select-none">
+      {/* View B Close Button */}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -89,7 +119,7 @@ export function PhotoViewer({
       </button>
 
       {/* MAIN PHOTO */}
-      <div className="w-full flex justify-center flex-1 items-center mt-12">
+      <div className="w-full flex-1 justify-center flex items-center mt-12">
         <AnimatePresence mode="wait">
           <motion.div
             key={photo.id}
@@ -114,9 +144,9 @@ export function PhotoViewer({
       {/* REEL STRIP */}
       <div
         ref={stripRef}
-        // Changed to justify-start, added mx-auto and space to prevent clipping
-        className="mt-8 w-full max-w-4xl flex justify-start gap-3 overflow-x-auto px-8 py-4 no-scrollbar z-50 scroll-smooth"
+        className="flex-shrink-0 my-6 w-full max-w-4xl flex justify-start gap-3 overflow-x-auto px-8 py-4 no-scrollbar z-50 scroll-smooth"
       >
+        {/* Note: If you added the invisible spacers earlier, keep them here */}
         {photos.map((p) => (
           <div
             key={p.id}
@@ -126,8 +156,7 @@ export function PhotoViewer({
             }}
             className={`w-10 h-14 flex-shrink-0 cursor-pointer transition-all duration-300 ${
               p.id === currentPhotoId
-                ? // Using ring instead of outline so it renders outside the box cleanly
-                  "ring-2 ring-white ring-offset-2 ring-offset-black scale-110 opacity-100 z-10 shadow-xl"
+                ? "ring-2 ring-white ring-offset-2 ring-offset-black scale-110 opacity-100 z-10 shadow-xl"
                 : "opacity-40 hover:opacity-80"
             }`}
           >
@@ -140,9 +169,9 @@ export function PhotoViewer({
         ))}
       </div>
 
-      {/* ACTION PILL & ARROWS (Gravity applied) */}
+      {/* ACTION PILL & ARROWS */}
       <div className="mt-8 flex items-center gap-3 z-50 mb-4">
-        {/* View B Left Arrow */}
+        {/* Left Arrow */}
         <button
           onClick={prevPhoto}
           disabled={currentIndex === 0}
@@ -151,7 +180,7 @@ export function PhotoViewer({
           ←
         </button>
 
-        {/* The Floating Items */}
+        {/* Floating Items */}
         <div className="flex items-center gap-3">
           <button
             className="px-6 py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-sm"
@@ -189,7 +218,7 @@ export function PhotoViewer({
           </button>
         </div>
 
-        {/* View B Right Arrow */}
+        {/* Right Arrow */}
         <button
           onClick={nextPhoto}
           disabled={currentIndex === photos.length - 1}
