@@ -6,7 +6,6 @@ interface PolaroidCardProps {
   isViewB?: boolean;
 }
 
-// Temporary placeholder image logic
 const getPlaceholderUrl = (id: number, size: "small" | "large") => {
   const height = size === "large" ? 1200 : 800;
   return `https://picsum.photos/seed/${id}/${height}/600`;
@@ -24,51 +23,59 @@ export function PolaroidCard({
     <div
       onClick={onClick}
       className={`
-        relative flex flex-col p-3 pb-16 shadow-sm hover:shadow-md transition-all duration-300
+        relative flex flex-col shadow-sm hover:shadow-md transition-all duration-300
         ${onClick ? "cursor-pointer hover:opacity-90" : ""}
-        ${isDark ? "bg-zinc-900 border border-zinc-800" : "bg-white"}
-        ${isViewB ? "max-w-4xl w-full shadow-2xl p-4 pb-24" : "rounded-sm"}
+        ${
+          isDark
+            ? "bg-zinc-900 border border-zinc-800"
+            : "bg-blend-luminosity bg-zinc-300"
+        }
+
+        /* FIXED: Only use @container when NOT in View B */
+        ${
+          isViewB
+            ? "w-full max-w-4xl shadow-2xl p-4 pb-20"
+            : "@container rounded-sm p-2 pb-12 sm:pb-14"
+        }
       `}
     >
       <img
         src={imageUrl}
         alt={photo.title || "Gallery photo"}
         className={`w-full h-auto object-contain ${
-          isViewB ? "max-h-[50vh]" : ""
+          isViewB ? "max-h-[50vh] min-h-[30vh]" : ""
         }`}
         loading="lazy"
-        draggable={false} // Stops Ghost Image (Default White arrow scroll)
+        draggable={false}
       />
 
-      {/* Bottom Left: Number */}
-      <span
+      {/* Bottom Text Wrapper */}
+      <div
         className={`
-        absolute font-bold tracking-widest font-orbitron
-        ${
-          isViewB
-            ? "bottom-6 left-6 text-l"
-            : "bottom-3 left-2 text-[clamp(0.5rem,1.5vw,0.75rem)]"
-        }
-        ${isDark ? "text-zinc-400" : "text-gray-900"}
-      `}
+          absolute bottom-0 left-0 w-full flex justify-between items-center gap-2 overflow-hidden
+          ${isViewB ? "px-6 pb-6" : "px-3 pb-4"}
+        `}
       >
-        {"CA " + photo.collection_id}.{photo.position}
-      </span>
+        <span
+          className={`
+            font-bold tracking-widest font-orbitron whitespace-nowrap
+            ${isViewB ? "text-lg" : "text-[clamp(0.45rem,4.5cqi,0.8rem)]"}
+            ${isDark ? "text-zinc-200" : "text-gray-900"}
+          `}
+        >
+          {"Subject " + photo.collection_id}:{photo.position}
+        </span>
 
-      {/* Bottom Right: Signature */}
-      <span
-        className={`
-        absolute font-bold tracking-widest uppercase whitespace-nowrap overflow-hidden text-ellipsis max-w-[60%] font-orbitron
-        ${
-          isViewB
-            ? "bottom-6 right-6 text-sm"
-            : "bottom-3 right-2 text-[clamp(0.4rem,1vw,0.65rem)]"
-        }
-        ${isDark ? "text-zinc-400" : "text-gray-900"}
-      `}
-      >
-        {photo.artist_name || "Artist Name"}
-      </span>
+        <span
+          className={`
+            font-bold tracking-widest uppercase font-orbitron text-right whitespace-nowrap
+            ${isViewB ? "text-sm" : "text-[clamp(0.4rem,3.5cqi,0.7rem)]"}
+            ${isDark ? "text-zinc-200" : "text-gray-900"}
+          `}
+        >
+          {photo.artist_name || "Artist Name"}
+        </span>
+      </div>
     </div>
   );
 }

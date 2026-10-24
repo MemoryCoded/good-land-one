@@ -31,8 +31,10 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
           // 50% #E8D5A5 = Base Manila Color (Middle)
           // 85% #D4BA7A = Shadow Gold
           // 100% #B89B5E = Deep Edge Shadow (End)
+          //background:
+          //"linear-gradient(135deg, #121727 57%, #F5E6C4 25%, #a68021 50%, #D4BA7A 85%, #e3dccf 100%)",
           background:
-            "linear-gradient(135deg, #838353 57%, #F5E6C4 25%, #E8D5A5 50%, #D4BA7A 85%, #B89B5E 100%)",
+            "linear-gradient(135deg, #bac2ea 0%, #969bdb 10%, #121727 57%, #F5E6C4 42%, #a68021 57%, #D4BA7A 85%, #e3dccf 100%)",
 
           // inset 0 2px 3px white = Light shining on the top inside edge
           // inset 0 -3px 5px black = Shadow on the bottom inside edge
@@ -43,11 +45,11 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
         {/* Left Tab: Clickable to toggle */}
         <div
           onClick={() => setIsOpen(!isOpen)}
-          className="w-[30%] flex flex-col justify-center items-center cursor-pointer z-10 hover:bg-black/5 transition-colors font-obitron"
+          className="w-[30%] flex flex-col justify-center items-center cursor-pointer z-10 hover:bg-black/70 transition-colors font-obitron"
           title="Toggle Header"
         >
           {/* Using clamp() to scale text, removing truncate */}
-          <h1 className="text-[clamp(0.75rem,1.5vw,1.1rem)] font-bold tracking-tight text-gray-200 leading-tight text-center font-orbitron">
+          <h1 className="text-[clamp(1.2rem,1.5vw,1.1rem)] font-extrabold tracking-tight text-[#ffffff] leading-tight text-center font-alternate">
             {title}
           </h1>
           <p className="text-[clamp(0.7rem,1vw,0.8rem)] font-medium text-gray-200 mt-1 drop-shadow-[0_1_1px_rgba(255,255,255,0.5)] text-center font-orbitron">

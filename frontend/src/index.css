@@ -1,9 +1,18 @@
 @import url("https://fonts.googleapis.com/css2?family=Sixtyfour+Convergence&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Iceland&display=swap");
 @import "tailwindcss";
 
 @theme {
   --font-orbitron: "Orbitron", sans-serif;
   --font-space: "Sixtyfour Convergence", sans-serif;
+  --font-alternate: "Iceland", sans-serif;
+}
+
+/* Helper Utility for 64 scanlines */
+@utility scan-max {
+  font-variation-settings:
+    "SCAN" 100,
+    "BLED" 20;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

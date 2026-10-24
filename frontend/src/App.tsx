@@ -11,6 +11,7 @@ import { PhotoGrid } from "./components/PhotoGrid";
 import { PhotoViewer } from "./components/PhotoViewer";
 import { ManHeader } from "./components/Header";
 import { CollectionsPage } from "./pages/CollectionsPage";
+import { CollectionDetailPage } from "./pages/CollectionDetailPage";
 import type { Photo } from "./types/photo";
 
 function App() {
@@ -50,6 +51,8 @@ function App() {
 
         {/* FIXED: Passed photos and current ID to the Viewer */}
         <Route path="/photo/:id" element={<PhotoRoute photos={photos} />} />
+
+        <Route path="/collections/:name" element={<CollectionDetailPage />} />
       </Routes>
     </div>
   );

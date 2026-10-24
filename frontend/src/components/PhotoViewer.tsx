@@ -119,7 +119,7 @@ export function PhotoViewer({
       </button>
 
       {/* MAIN PHOTO */}
-      <div className="w-full flex-1 justify-center flex items-center mt-12">
+      <div className="w-full flex-1 min-h-0 justify-center flex items-center mt-12">
         <AnimatePresence mode="wait">
           <motion.div
             key={photo.id}
@@ -134,7 +134,7 @@ export function PhotoViewer({
               if (offset.x < -50) nextPhoto();
               if (offset.x > 50) prevPhoto();
             }}
-            className="cursor-grab active:cursor-grabbing"
+            className="w-full max-w-4xl flex justify-center cursor-grab active:cursor-grabbing"
           >
             <PolaroidCard photo={photo} isViewB={true} />
           </motion.div>
@@ -186,7 +186,7 @@ export function PhotoViewer({
             className="px-6 py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-sm"
             title="Share"
           >
-            Outer
+            Links
           </button>
 
           <button
