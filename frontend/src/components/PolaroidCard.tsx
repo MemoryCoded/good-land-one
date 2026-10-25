@@ -1,4 +1,6 @@
 import type { Photo } from "../types/photo";
+import { useGalleryStore } from "../store/useGalleryStore"; // Import store
+import { THEMES } from "../config/themes"; // Import themes
 
 interface PolaroidCardProps {
   photo: Photo;
@@ -16,25 +18,32 @@ export function PolaroidCard({
   onClick,
   isViewB = false,
 }: PolaroidCardProps) {
-  const isDark = photo.canvas_theme === "dark";
+  // Grab the default theme and the overrides dictionary from Zustand
+  const defaultPolaroidTheme = useGalleryStore(
+    (state) => state.defaultPolaroidTheme,
+  );
+
+  const photoOverrides = useGalleryStore((state) => state.photoOverrides);
+  // Check override first, then fallback to default
+  const activeThemeName = photoOverrides[photo.id] || defaultPolaroidTheme;
+
+  // CSS FOR THEME
+  const theme = THEMES[activeThemeName];
+
   const imageUrl = getPlaceholderUrl(photo.id, isViewB ? "large" : "small");
 
   return (
     <div
       onClick={onClick}
+      style={{ boxShadow: theme.innerStyle }} // Apply the inner bevel
       className={`
-        relative flex flex-col shadow-sm hover:shadow-md transition-all duration-300
+        relative flex flex-col transition-all duration-300
         ${onClick ? "cursor-pointer hover:opacity-90" : ""}
-        ${
-          isDark
-            ? "bg-zinc-900 border border-zinc-800"
-            : "bg-blend-luminosity bg-zinc-300"
-        }
-
-        /* FIXED: Only use @container when NOT in View B */
+        ${theme.base} /* Apply the background color/gradient */
+        ${theme.shadow} /* Apply the heavy drop shadow */
         ${
           isViewB
-            ? "w-full max-w-4xl shadow-2xl p-4 pb-20"
+            ? "w-full max-w-4xl p-4 pb-20"
             : "@container rounded-sm p-2 pb-12 sm:pb-14"
         }
       `}
@@ -60,7 +69,7 @@ export function PolaroidCard({
           className={`
             font-bold tracking-widest font-orbitron whitespace-nowrap
             ${isViewB ? "text-lg" : "text-[clamp(0.45rem,4.5cqi,0.8rem)]"}
-            ${isDark ? "text-zinc-200" : "text-gray-900"}
+            ${theme.textPrimary} /* Use theme text color */
           `}
         >
           {"Subject " + photo.collection_id}:{photo.position}
@@ -70,7 +79,7 @@ export function PolaroidCard({
           className={`
             font-bold tracking-widest uppercase font-orbitron text-right whitespace-nowrap
             ${isViewB ? "text-sm" : "text-[clamp(0.4rem,3.5cqi,0.7rem)]"}
-            ${isDark ? "text-zinc-200" : "text-gray-900"}
+            ${theme.textPrimary}
           `}
         >
           {photo.artist_name || "Artist Name"}

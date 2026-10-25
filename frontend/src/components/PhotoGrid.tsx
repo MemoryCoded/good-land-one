@@ -130,7 +130,7 @@ export function PhotoGrid({
           <div
             key={collectionId}
             className="collection-section px-4 sm:px-8 pt-12 pb-4"
-            data-title={`Virtual Gallery | ${collectionName}`}
+            data-title={`Exhibition | ${collectionName}`}
             data-date={formattedDate}
           >
             {/* 6. The Framer Motion Grid */}
@@ -146,7 +146,7 @@ export function PhotoGrid({
                   {/* NEW: Inner div for the hover pop */}
                   <div
                     className="transition-all duration-300 ease-out hover:-translate-y-0.5
-                                  hover:shadow-2xl hover:shadow-gray/50"
+                                  hover:shadow-lg hover:shadow-gray/50"
                   >
                     <PolaroidCard photo={photo} />
                   </div>
