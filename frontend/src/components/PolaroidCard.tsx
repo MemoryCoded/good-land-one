@@ -72,7 +72,7 @@ export function PolaroidCard({
             ${theme.textPrimary} /* Use theme text color */
           `}
         >
-          {"Subject " + photo.collection_id}:{photo.position}
+          {"Tablet " + photo.collection_id}.{photo.position}
         </span>
 
         <span

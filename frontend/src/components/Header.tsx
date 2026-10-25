@@ -28,7 +28,7 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
             ? "polygon(0 0, 100% 0, 100% 63%, 30% 60%, 18% 100%, 0 100%)"
             : "polygon(0 0, 30% 0, 30% 60%, 30% 100%, 20% 100%, 0 100%)",
           background:
-            "linear-gradient(135deg, #bac2ea 0%, #969bdb 10%, #121727 55%, #0c0c0c 56%, #a68021 57%, #D4BA7A 85%, #e3dccf 100%)",
+            "linear-gradient(135deg, #333c67 0%, #31324e 7%, #2c479e 55%, #0c0c0c 56%, #1737d8 57%, #06080d 85%, #536287  100%)",
           boxShadow:
             "inset 0 3px 3px rgba(249, 248, 248, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.15)",
         }}
@@ -88,7 +88,7 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
                   onClick={togglePageTheme}
                   className="text-left hover:text-white transition-all flex items-center gap-2 text-xs"
                 >
-                  <span className="uppercase tracking-widest text-gray-400">
+                  <span className="uppercase tracking-widest text-gray-300">
                     Page Theme
                   </span>
                   <span className="border border-gray-500 px-2 py-0.5 rounded bg-black/40 text-white">
@@ -100,7 +100,7 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
                   onClick={toggleDefaultPolaroidTheme}
                   className="text-left hover:text-white transition-all flex items-center gap-2 text-xs"
                 >
-                  <span className="uppercase tracking-widest text-gray-400">
+                  <span className="uppercase tracking-widest text-gray-300">
                     Frame Theme
                   </span>
                   <span className="border border-gray-500 px-2 py-0.5 rounded bg-black/40 text-white">

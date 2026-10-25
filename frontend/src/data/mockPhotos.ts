@@ -17,7 +17,7 @@ const generateMockPhoto = (
     position: (id % 10) + 1,
     title: `Mock Photo ${id}`,
     description: "This is a test description.",
-    artist_name: "RANDOMARTIST",
+    artist_name: "RECORDSOFDUST",
     filename: `mock_${id}.jpg`,
     thumbnail_small: `https://picsum.photos/seed/${id}/400/${
       sizes[aspect].h / 2
