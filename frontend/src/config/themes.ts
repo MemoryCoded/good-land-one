@@ -18,6 +18,6 @@ export const THEMES = {
     textSecondary: "text-zinc-400",
     // Inset shadows to create a beveled metal edge
     innerStyle:
-      "inset 0 1px 2px rgba(27, 112, 14, 0.4), inset 0 -2px 4px rgba(0,0,0,0.6)",
+      "inset 0 1px 2px rgba(27, 112, 14, 0.4), inset 0px -10px 8px rgba(15, 14, 14, 0.4)",
   },
 } as const;

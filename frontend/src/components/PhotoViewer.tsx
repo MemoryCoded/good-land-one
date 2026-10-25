@@ -18,6 +18,7 @@ export function PhotoViewer({
 }: PhotoViewerProps) {
   const navigate = useNavigate();
   const stripRef = useRef<HTMLDivElement>(null);
+  const mainPhotoRef = useRef<HTMLDivElement>(null);
 
   // Toggle Function from Zustand
   const togglePhotoTheme = useGalleryStore((state) => state.togglePhotoTheme);
@@ -102,8 +103,11 @@ export function PhotoViewer({
       }
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
+    const photoRef = mainPhotoRef.current;
+    if (photoRef) {
+      photoRef.addEventListener("wheel", handleWheel, { passive: false });
+      return () => photoRef.removeEventListener("wheel", handleWheel);
+    }
   }, [currentIndex, photos]);
 
   // 6. NOW it is safe to do an early return
@@ -123,7 +127,10 @@ export function PhotoViewer({
       </button>
 
       {/* MAIN PHOTO */}
-      <div className="w-full flex-1 min-h-0 justify-center flex items-center mt-12">
+      <div
+        ref={mainPhotoRef}
+        className="w-full flex-1 min-h-0 justify-center flex items-center mt-12"
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={photo.id}
