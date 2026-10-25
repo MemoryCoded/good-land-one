@@ -3,6 +3,7 @@ import type { Photo } from "../types/photo";
 import { PolaroidCard } from "./PolaroidCard";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGalleryStore } from "../store/useGalleryStore";
 
 interface PhotoViewerProps {
   photos: Photo[];
@@ -17,6 +18,9 @@ export function PhotoViewer({
 }: PhotoViewerProps) {
   const navigate = useNavigate();
   const stripRef = useRef<HTMLDivElement>(null);
+
+  // Toggle Function from Zustand
+  const togglePhotoTheme = useGalleryStore((state) => state.togglePhotoTheme);
 
   // 1. Ref for the trackpad throttle
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -204,17 +208,14 @@ export function PhotoViewer({
           </button>
 
           <button
+            onClick={(e) => {
+              e.stopPropagation(); // Stop click from closing viewer
+              togglePhotoTheme(photo.id);
+            }}
             className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-xl"
             title="Canvas Toggle"
           >
             ▣
-          </button>
-
-          <button
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:text-red-400 hover:bg-red-950 transition-colors ml-2 text-lg"
-            title="Delete"
-          >
-            🗑
           </button>
         </div>
 

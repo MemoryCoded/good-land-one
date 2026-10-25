@@ -3,7 +3,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { MOCK_PHOTOS } from "../data/mockPhotos";
 import { PhotoGrid } from "../components/PhotoGrid";
-import { useState } from "react";
+//import { useState } from "react";
 
 export function CollectionDetailPage() {
   const { name } = useParams();

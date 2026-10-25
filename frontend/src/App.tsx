@@ -13,18 +13,30 @@ import { ManHeader } from "./components/Header";
 import { CollectionsPage } from "./pages/CollectionsPage";
 import { CollectionDetailPage } from "./pages/CollectionDetailPage";
 import type { Photo } from "./types/photo";
+import { useGalleryStore } from "./store/useGalleryStore";
 
 function App() {
   const photos = MOCK_PHOTOS;
-  const navigate = useNavigate(); // <-- Bring the steering wheel back
+  // Routes url steering wheel
+  const navigate = useNavigate();
+
+  // Grabs the page tjeme from Zustand
+  const pageTheme = useGalleryStore((state) => state.pageTheme);
+  const isDark = pageTheme === "Dark";
 
   const [activeTitle, setActiveTitle] = useState(
-    "Virtual Gallery | Test Collection",
+    "Exhibition  | Test Collection",
   );
   const [activeDate, setActiveDate] = useState("Oct 2026");
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans">
+    <div
+      //Applying background via inline styles AND classes to be 100% safe
+      style={{ backgroundColor: isDark ? "#09090b" : "#fafafa" }}
+      className={`min-h-screen font-sans transition-colors duration-500 ${
+        isDark ? "text-zinc-100" : "text-zinc-900"
+      }`}
+    >
       <ManHeader title={activeTitle} date={activeDate} />
 
       <Routes>
