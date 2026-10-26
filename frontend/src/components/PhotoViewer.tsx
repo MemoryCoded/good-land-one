@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Photo } from "../types/photo";
 import { PolaroidCard } from "./PolaroidCard";
+import { InfoOverlay } from "./InfoOverlay";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGalleryStore } from "../store/useGalleryStore";
@@ -18,6 +19,7 @@ export function PhotoViewer({
 }: PhotoViewerProps) {
   const navigate = useNavigate();
   const stripRef = useRef<HTMLDivElement>(null);
+  const mainPhotoRef = useRef<HTMLDivElement>(null);
 
   // Toggle Function from Zustand
   const togglePhotoTheme = useGalleryStore((state) => state.togglePhotoTheme);
@@ -27,6 +29,8 @@ export function PhotoViewer({
 
   const currentIndex = photos.findIndex((p) => p.id === currentPhotoId);
   const photo = photos[currentIndex];
+
+  const [showInfo, setShowInfo] = useState(false);
 
   // 2. Define functions BEFORE the effects that use them
   const nextPhoto = () => {
@@ -102,8 +106,11 @@ export function PhotoViewer({
       }
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
+    const photoRef = mainPhotoRef.current;
+    if (photoRef) {
+      photoRef.addEventListener("wheel", handleWheel, { passive: false });
+      return () => photoRef.removeEventListener("wheel", handleWheel);
+    }
   }, [currentIndex, photos]);
 
   // 6. NOW it is safe to do an early return
@@ -123,7 +130,10 @@ export function PhotoViewer({
       </button>
 
       {/* MAIN PHOTO */}
-      <div className="w-full flex-1 min-h-0 justify-center flex items-center mt-12">
+      <div
+        ref={mainPhotoRef}
+        className="w-full flex-1 min-h-0 justify-center flex items-center mt-12"
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={photo.id}
@@ -174,46 +184,51 @@ export function PhotoViewer({
       </div>
 
       {/* ACTION PILL & ARROWS */}
-      <div className="mt-8 flex items-center gap-3 z-50 mb-4">
+      <div className="mt-8 flex items-center justify-center w-full max-w-full z-50 mb-4 px-2">
         {/* Left Arrow */}
         <button
           onClick={prevPhoto}
           disabled={currentIndex === 0}
-          className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-blue-600 transition-colors font-space text-lg"
+          className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-blue-600 transition-colors font-space text-lg mr-3"
         >
           ←
         </button>
 
         {/* Floating Items */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full px-2 py-2">
           <button
-            className="px-6 py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-sm"
+            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-[10px] sm:text-sm whitespace-nowrap"
             title="Share"
           >
             Links
           </button>
 
           <button
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-xl"
+            className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
             title="Favorite"
           >
             ♡
           </button>
 
+          {/* LABEL Button */}
           <button
-            className="px-6 py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space font-bold text-sm tracking-widest"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowInfo(true);
+            }}
+            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space font-bold text-[10px] sm:text-sm tracking-widest whitespace-nowrap"
             title="Info"
           >
             LABEL
           </button>
 
+          {/*Canvas button */}
           <button
             onClick={(e) => {
               e.stopPropagation(); // Stop click from closing viewer
               togglePhotoTheme(photo.id);
             }}
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-xl"
-            title="Canvas Toggle"
+            className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
           >
             ▣
           </button>
@@ -223,11 +238,17 @@ export function PhotoViewer({
         <button
           onClick={nextPhoto}
           disabled={currentIndex === photos.length - 1}
-          className="w-11 h-11 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-red-600 transition-colors font-space text-lg"
+          className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-red-600 transition-colors font-space text-lg ml-3"
         >
           →
         </button>
       </div>
+      {/* Info Overlay*/}
+      <AnimatePresence>
+        {showInfo && (
+          <InfoOverlay photo={photo} onClose={() => setShowInfo(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -2,12 +2,12 @@ export const THEMES = {
   "white-matte": {
     name: "White Matte",
     base: "bg-[#f4f4f5] border border-[#e4e4e7]", // Light off-white
-    shadow: "shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)]",
+    shadow: "shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)]",
     textPrimary: "text-gray-900",
     textSecondary: "text-gray-600",
     // An inner highlight to make it look like thick paper
     innerStyle:
-      "inset 0 2px 4px rgb(198, 203, 229), inset 0 -2px 4px rgba(0,0,0,0.05)",
+      "inset 0px 0px rgb(22, 88, 231), inset 10px -10px 50px rgba(186, 186, 218, 0.8)",
   },
   "grey-metallic": {
     name: "Grey Metallic",
@@ -18,6 +18,6 @@ export const THEMES = {
     textSecondary: "text-zinc-400",
     // Inset shadows to create a beveled metal edge
     innerStyle:
-      "inset 0 1px 2px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.6)",
+      "inset 0 1px 2px rgba(27, 112, 14, 0.4), inset 0px -10px 8px rgba(15, 14, 14, 0.4)",
   },
 } as const;

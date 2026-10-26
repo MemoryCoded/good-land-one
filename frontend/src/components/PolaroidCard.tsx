@@ -51,14 +51,16 @@ export function PolaroidCard({
       <img
         src={imageUrl}
         alt={photo.title || "Gallery photo"}
+        // No image cropping
+        // max-h-60vh to fit photo on screen while preserving reel strip
         className={`w-full h-auto object-contain ${
-          isViewB ? "max-h-[50vh] min-h-[30vh]" : ""
+          isViewB ? "max-h-[55vh] sm:max-h-[65vh] min-h-[20vh]" : ""
         }`}
         loading="lazy"
         draggable={false}
       />
 
-      {/* Bottom Text Wrapper */}
+      {/*Replace the Bottom Text Wrapper section*/}
       <div
         className={`
           absolute bottom-0 left-0 w-full flex justify-between items-center gap-2 overflow-hidden
@@ -67,18 +69,18 @@ export function PolaroidCard({
       >
         <span
           className={`
-            font-bold tracking-widest font-orbitron whitespace-nowrap
-            ${isViewB ? "text-lg" : "text-[clamp(0.45rem,4.5cqi,0.8rem)]"}
-            ${theme.textPrimary} /* Use theme text color */
+            font-bold tracking-widest font-orbitron whitespace-nowrap min-w-0
+            ${isViewB ? "text-lg" : "text-[clamp(0.1rem,4.5cqi,0.8rem)]"}
+            ${theme.textPrimary}
           `}
         >
-          {"Subject " + photo.collection_id}:{photo.position}
+          {"Tablet " + photo.collection_id}.{photo.position}
         </span>
 
         <span
           className={`
-            font-bold tracking-widest uppercase font-orbitron text-right whitespace-nowrap
-            ${isViewB ? "text-sm" : "text-[clamp(0.4rem,3.5cqi,0.7rem)]"}
+            font-bold tracking-widest uppercase font-orbitron text-right whitespace-nowrap truncate min-w-0
+            ${isViewB ? "text-sm" : "text-[clamp(0.35rem,3.5cqi,0.7rem)]"}
             ${theme.textPrimary}
           `}
         >
