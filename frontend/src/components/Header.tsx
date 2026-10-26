@@ -19,10 +19,12 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
     resetThemes,
   } = useGalleryStore();
 
+  const [titlePart1, titlePart2] = title.split("|").map((s) => s.trim());
+
   return (
     <header className="sticky top-0 z-50 w-full drop-shadow-md">
       <div
-        className="w-full h-24 flex relative transition-all duration-500 ease-in-out"
+        className="w-full h-32 sm:h-24 flex relative transition-all duration-500 ease-in-out"
         style={{
           clipPath: isOpen
             ? "polygon(0 0, 100% 0, 100% 63%, 30% 60%, 18% 100%, 0 100%)"
@@ -36,36 +38,50 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
         {/* Left Tab */}
         <div
           onClick={() => setIsOpen(!isOpen)}
-          className="w-[30%] flex flex-col justify-center items-center cursor-pointer z-10 hover:bg-black/70 transition-colors"
+          className="w-[30%] flex flex-col justify-center items-center cursor-pointer z-10 hover:bg-black/70 transition-colors pb-6 sm:pb-0"
           title="Toggle Header"
         >
-          <h1 className="text-[clamp(1.2rem,1.5vw,1.1rem)] font-extrabold tracking-tight text-[#ffffff] leading-tight text-center font-alternate">
-            {title}
-          </h1>
-          <p className="text-[clamp(0.7rem,1vw,0.8rem)] font-medium text-gray-200 mt-1 text-center font-orbitron">
-            {date}
-          </p>
+          <div className="flex flex-col items-center w-full px-2">
+            {titlePart1 && (
+              <h1 className="text-xs sm:text-sm font-bold text-white uppercase tracking-widest font-alternate">
+                {titlePart1}
+              </h1>
+            )}
+
+            {/* Horizontal Line Separator */}
+            {titlePart1 && titlePart2 && (
+              <div className="w-12 h-[1px] bg-gray-400/50 my-1.5" />
+            )}
+
+            {/* Single Text Marquee with Fade Mask */}
+            {titlePart2 && (
+              <div className="w-full marquee-mask flex justify-center">
+                <h2 className="text-[10px] sm:text-xs font-extrabold text-white animate-marquee-single uppercase tracking-wider font-orbitron">
+                  {titlePart2}
+                </h2>
+              </div>
+            )}
+
+            <p className="text-[9px] sm:text-[10px] font-medium text-gray-300 mt-1 uppercase tracking-wider font-orbitron">
+              {date}
+            </p>
+          </div>
         </div>
 
-        {/* Right Body */}
+        {/* Right Body (Nav / Config) */}
         <div
-          // Removed pb-7 so it vertically centers inside the 63% height constraint
-          className={`w-[70%] flex items-center pl-12 pr-8 transition-opacity duration-300 ${
+          className={`w-[70%] flex items-center pl-4 sm:pl-12 pr-4 sm:pr-8 transition-opacity duration-300 ${
             isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
           {!showConfig ? (
-            /* --- DEFAULT NAVIGATION --- */
-            <nav className="flex w-full justify-evenly text-sm font-semibold text-gray-200 font-orbitron pb-7">
-              <Link
-                to="/"
-                className="hover:text-black transition-colors drop-shadow-sm"
-              >
+            <nav className="flex w-full justify-between sm:justify-evenly text-[10px] sm:text-sm font-semibold text-gray-200 font-orbitron pb-6 sm:pb-7">
+              <Link to="/" className="hover:text-black transition-colors">
                 Gallery
               </Link>
               <button
                 onClick={() => setShowConfig(true)}
-                className="hover:text-black transition-colors drop-shadow-sm uppercase tracking-widest font-bold"
+                className="hover:text-black transition-colors drop-shadow-sm tracking-widest font-bold"
               >
                 Config
               </button>
@@ -80,47 +96,43 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
               </button>
             </nav>
           ) : (
-            /* --- CONFIG MENU (Horizontal Row) --- */
-            <div className="flex items-center justify-between w-full font-orbitron text-gray-200 pb-7">
-              {/* Horizontal Buttons */}
-              <div className="flex flex-row items-center gap-6">
+            <div className="flex items-center justify-between w-full font-orbitron text-gray-200 pb-6 sm:pb-7">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-6">
                 <button
                   onClick={togglePageTheme}
-                  className="text-left hover:text-white transition-all flex items-center gap-2 text-xs"
+                  className="text-left hover:text-white transition-all flex items-center gap-2 text-[9px] sm:text-xs"
                 >
                   <span className="uppercase tracking-widest text-gray-300">
                     Page Theme
                   </span>
-                  <span className="border border-gray-500 px-2 py-0.5 rounded bg-black/40 text-white">
+                  <span className="border border-gray-500 px-1.5 sm:px-2 py-0.5 rounded bg-black/40 text-white">
                     {pageTheme}
                   </span>
                 </button>
 
                 <button
                   onClick={toggleDefaultPolaroidTheme}
-                  className="text-left hover:text-white transition-all flex items-center gap-2 text-xs"
+                  className="text-left hover:text-white transition-all flex items-center gap-2 text-[9px] sm:text-xs"
                 >
                   <span className="uppercase tracking-widest text-gray-300">
                     Frame Theme
                   </span>
-                  <span className="border border-gray-500 px-2 py-0.5 rounded bg-black/40 text-white">
-                    {defaultPolaroidTheme === "white-matte" ? "WHITE" : "METAL"}
+                  <span className="border border-gray-500 px-1.5 sm:px-2 py-0.5 rounded bg-black/40 text-white">
+                    {defaultPolaroidTheme === "white-matte" ? "White" : "Metal"}
                   </span>
                 </button>
 
-                {/* RESET BUTTON */}
                 <button
                   onClick={resetThemes}
-                  className="text-left border border-gray-200 px-2 py-0.5 rounded bg-black/40 text-red-400 hover:text-red-900 transition-all text-xs uppercase tracking-widest font-bold"
+                  className="text-left border border-gray-200 px-1.5 sm:px-2 py-0.5 rounded bg-black/40 text-red-400 hover:text-red-900 transition-all text-[9px] sm:text-xs uppercase tracking-widest font-bold"
                 >
                   Reset
                 </button>
               </div>
 
-              {/* Close Config Button */}
               <button
                 onClick={() => setShowConfig(false)}
-                className="text-red-400 hover:text-red-200 font-bold text-2xl transition-colors ml-4"
+                className="text-red-400 hover:text-red-200 font-bold text-xl sm:text-2xl transition-colors ml-2 sm:ml-4"
                 title="Close Config"
               >
                 ✕

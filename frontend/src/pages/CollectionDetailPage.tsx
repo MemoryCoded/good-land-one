@@ -3,11 +3,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { MOCK_PHOTOS } from "../data/mockPhotos";
 import { PhotoGrid } from "../components/PhotoGrid";
+import { useGalleryStore } from "../store/useGalleryStore";
+
 //import { useState } from "react";
 
 export function CollectionDetailPage() {
   const { name } = useParams();
   const navigate = useNavigate();
+
+  // Define isdark
+  const pageTheme = useGalleryStore((state) => state.pageTheme);
+  const isDark = pageTheme === "Dark";
 
   // Map colllection name using ID
 
@@ -27,9 +33,14 @@ export function CollectionDetailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans pb-24">
+    <div className="min-h-screen font-sans pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-12 mb-4">
-        <h1 className="text-3xl font-bold text-[#344373] font-alternate uppercase tracking-widest pb-3">
+        {/* 3. Dynamic Text Colors based on theme */}
+        <h1
+          className={`text-3xl font-bold font-alternate uppercase tracking-widest ${
+            isDark ? "text-white" : "text-[#1c4a98]"
+          }`}
+        >
           {name}
         </h1>
         <p className="text-gray-500 font-extrabold text-xl mt-1 font-alternate">
