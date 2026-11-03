@@ -7,7 +7,7 @@ The database.py file is responsible for setting up the database connection and s
 It uses SQLAlchemy to create an asynchronous engine  and it defines a declarative base class (Base) for defining models. T
 he AsyncSessionLocal is an asynchronous session factory that allows for creating and managing database sessions.
 """
-# Declarative base is
+# Declarative base
 Base = declarative_base()
 
 # Create an asynchronous engine for the database connection using SQLAlchemy's create_async_engine function.

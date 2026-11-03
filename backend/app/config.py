@@ -24,5 +24,7 @@ class Settings(BaseSettings):
 
     sentry_dsn: str = ""
 
+    admin_api_key: str = "super-secret-admin-key-12345"
+
 
 settings = Settings()

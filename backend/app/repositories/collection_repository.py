@@ -13,3 +13,9 @@ class CollectionRepository:
         result = await self.db.execute(stmt)
         # The scalars method is used to extract the individual Collection objects from the result of the query. The all method is then called to retrieve all the Collection objects as a list.
         return list(result.scalars().all())
+
+    # Check if a collection exists
+    async def get_by_id(self, collection_id: int) -> Collection | None:
+        stmt = select(Collection).where(Collection.id == collection_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()

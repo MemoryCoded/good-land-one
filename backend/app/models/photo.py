@@ -76,6 +76,10 @@ class Photo(Base):
         foreign_keys=[collection_id],
     )
 
+    is_uncategorized: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+
     # Index may be redudant after unique constraint
     __table_args__ = (
         UniqueConstraint(

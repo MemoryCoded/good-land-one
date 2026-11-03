@@ -1,12 +1,14 @@
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
+from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-from app.config import settings
+# 1. Import Base from where it is defined
 from app.database import Base
+
+# 2. Import your models module.
+# This runs your __init__.py file, which registers Collection, Photo, etc. with Base.metadata
+
+from app.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -19,7 +21,8 @@ if config.config_file_name is not None:
 
 # This overrides the URL that Alembic would otherwise look for in alembic.ini.
 # Now Alembic uses DB_URL.
-config.set_main_option("sqlalchemy.url", settings.database_url)
+sync_url = settings.database_url.replace("postgresql+asyncpg://", "postgresql://")
+config.set_main_option("sqlalchemy.url", sync_url)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
