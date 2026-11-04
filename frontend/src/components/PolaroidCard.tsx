@@ -31,14 +31,13 @@ export function PolaroidCard({
       onClick={onClick}
       style={{ boxShadow: theme.innerStyle }}
       className={`
-        relative flex flex-col transition-all duration-300
+        relative flex flex-col transition-all duration-300 overflow-hidden
         ${onClick ? "cursor-pointer hover:opacity-90" : ""}
         ${theme.base}
         ${theme.shadow}
         ${
           isViewB
-            ? // FIXED: w-fit makes the card shrink-wrap the image.
-              // max-w-[90vw] keeps it from overflowing on mobile.
+            ? // 1. Max height of 80vh. Overflow hidden prevents the image from covering the text.
               "w-fit max-w-[90vw] max-h-[80vh] p-3 pb-16"
             : "@container w-full rounded-sm p-2 pb-12 sm:pb-14"
         }
@@ -47,9 +46,9 @@ export function PolaroidCard({
       <img
         src={imageUrl}
         alt={photo.title || "Gallery photo"}
-        // FIXED: max-h-[65vh] and w-auto makes the image scale naturally inside View B
+        // 2. Max height is calc(80vh - 6rem) to account for the 4rem bottom padding + top padding.
         className={`object-contain ${
-          isViewB ? "max-h-[65vh] w-auto mx-auto" : "w-full h-auto"
+          isViewB ? "max-h-[calc(80vh-6rem)] w-auto mx-auto" : "w-full h-auto"
         }`}
         loading="lazy"
         draggable={false}
