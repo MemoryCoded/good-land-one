@@ -1,22 +1,18 @@
-// This component is responsible for reading the URL, finding the matching photos, and rendering the grid.
-
 import { useParams, useNavigate } from "react-router-dom";
-import { MOCK_PHOTOS } from "../data/mockPhotos";
 import { PhotoGrid } from "../components/PhotoGrid";
 import { useGalleryStore } from "../store/useGalleryStore";
+import type { Photo } from "../types/photo"; // <-- Import the type
 
-//import { useState } from "react";
-
-export function CollectionDetailPage() {
+// Accept photos as a prop!
+export function CollectionDetailPage({ photos }: { photos: Photo[] }) {
   const { name } = useParams();
   const navigate = useNavigate();
 
-  // Define isdark
+  // Define isDark
   const pageTheme = useGalleryStore((state) => state.pageTheme);
   const isDark = pageTheme === "Dark";
 
-  // Map colllection name using ID
-
+  // Map collection name to ID (We will eventually replace this with a real backend query)
   const collectionMap: Record<string, number> = {
     Droneshots: 1,
     "Test Collection": 2,
@@ -28,14 +24,15 @@ export function CollectionDetailPage() {
 
   const collectionId = collectionMap[name || ""];
 
-  const collectionPhotos = MOCK_PHOTOS.filter(
+  // Filter the REAL photos passed from App.tsx
+  const collectionPhotos = photos.filter(
     (photo) => photo.collection_id === collectionId,
   );
 
   return (
     <div className="min-h-screen font-sans pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-12 mb-4">
-        {/* 3. Dynamic Text Colors based on theme */}
+        {/* Dynamic Text Colors based on theme */}
         <h1
           className={`text-3xl font-bold font-alternate uppercase tracking-widest ${
             isDark ? "text-white" : "text-[#1c4a98]"

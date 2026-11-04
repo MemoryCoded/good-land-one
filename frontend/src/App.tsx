@@ -5,33 +5,43 @@ import {
   useParams,
   useLocation,
 } from "react-router-dom";
-import { useState } from "react";
-import { MOCK_PHOTOS } from "./data/mockPhotos";
+import { useEffect, useState } from "react";
 import { PhotoGrid } from "./components/PhotoGrid";
 import { PhotoViewer } from "./components/PhotoViewer";
 import { ManHeader } from "./components/Header";
 import { CollectionsPage } from "./pages/CollectionsPage";
 import { CollectionDetailPage } from "./pages/CollectionDetailPage";
 import type { Photo } from "./types/photo";
+import { usePhotos } from "./hooks/usePhotos";
 import { useGalleryStore } from "./store/useGalleryStore";
+import { AdminLoginPage } from "./pages/admin/LoginPage";
+import { AdminLibraryPage } from "./pages/admin/AdminLibraryPage";
+import { AdminEditPage } from "./pages/admin/AdminEditPage"; // <-- Added
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
-  const photos = MOCK_PHOTOS;
-  // Routes url steering wheel
+  // 1. FIXED: lowercase isError
+  const { data: photos = [], isLoading, isError } = usePhotos();
+
   const navigate = useNavigate();
 
-  // Grabs the page tjeme from Zustand
   const pageTheme = useGalleryStore((state) => state.pageTheme);
   const isDark = pageTheme === "Dark";
 
-  const [activeTitle, setActiveTitle] = useState(
-    "Exhibition  | Test Collection",
-  );
   const [activeDate, setActiveDate] = useState("Oct 2026");
+
+  // State for the Title (updated by observer)
+  const [observedTitle, setObservedTitle] = useState<string | null>(null);
+
+  const fallbackTitle =
+    photos.length > 0 && photos[0].collection_name
+      ? `Exhibition | ${photos[0].collection_name}`
+      : "Exhibition";
+
+  const activeTitle = observedTitle || fallbackTitle;
 
   return (
     <div
-      //Applying background via inline styles AND classes to be 100% safe
       style={{ backgroundColor: isDark ? "#09090b" : "#fafafa" }}
       className={`min-h-screen font-sans transition-colors duration-500 ${
         isDark ? "text-zinc-100" : "text-zinc-900"
@@ -39,33 +49,69 @@ function App() {
     >
       <ManHeader title={activeTitle} date={activeDate} />
 
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <PhotoGrid
-              photos={photos}
-              // FIXED: Actually navigate and save scroll position
-              onPhotoClick={(photo) =>
-                navigate(`/photo/${photo.id}`, {
-                  state: { scrollY: window.scrollY },
-                })
-              }
-              onCollectionVisible={(title, date) => {
-                setActiveTitle(title);
-                setActiveDate(date);
-              }}
-            />
-          }
-        />
+      {/* 2. ADDED: Loading and Error States */}
+      {isLoading ? (
+        <div className="flex h-[50vh] items-center justify-center font-orbitron text-xl">
+          Loading Gallery...
+        </div>
+      ) : isError ? (
+        <div className="flex h-[50vh] items-center justify-center font-orbitron text-xl text-red-500">
+          Failed to connect to backend. Is the server running?
+        </div>
+      ) : (
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PhotoGrid
+                photos={photos}
+                onPhotoClick={(photo) =>
+                  navigate(`/photo/${photo.id}`, {
+                    state: { scrollY: window.scrollY },
+                  })
+                }
+                onCollectionVisible={(title, date) => {
+                  setObservedTitle(title);
+                  setActiveDate(date);
+                }}
+              />
+            }
+          />
 
-        <Route path="/collections" element={<CollectionsPage />} />
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
 
-        {/* FIXED: Passed photos and current ID to the Viewer */}
-        <Route path="/photo/:id" element={<PhotoRoute photos={photos} />} />
+          <Route
+            path="/admin/library"
+            element={
+              <ProtectedRoute>
+                <AdminLibraryPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/collections/:name" element={<CollectionDetailPage />} />
-      </Routes>
+          {/* 3. ADDED: The Edit Route */}
+          <Route
+            path="/admin/photo/:id"
+            element={
+              <ProtectedRoute>
+                <AdminEditPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Public Routes - 4. FIXED: Passed 'photos' prop */}
+          <Route
+            path="/collections"
+            element={<CollectionsPage photos={photos} />}
+          />
+          <Route
+            path="/collections/:name"
+            element={<CollectionDetailPage photos={photos} />}
+          />
+          <Route path="/photo/:id" element={<PhotoRoute photos={photos} />} />
+        </Routes>
+      )}
     </div>
   );
 }
@@ -76,10 +122,7 @@ function PhotoRoute({ photos }: { photos: Photo[] }) {
   const location = useLocation();
 
   const handleClose = () => {
-    // Read the saved scrollY from the state, or default to 0
     const savedScrollY = location.state?.scrollY || 0;
-
-    // Navigate back to root, passing the scroll position back
     navigate("/", { state: { restoreScrollY: savedScrollY }, replace: true });
   };
 

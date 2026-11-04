@@ -9,6 +9,7 @@ from app.schemas.collection import CollectionResponse
 class CollectionService:
     def __init__(self, db: AsyncSession = Depends(get_db)):
         # .repo is an attribute of the CollectionService class that holds an instance of the CollectionRepository class.
+        self.db = db
         self.repo = CollectionRepository(db)
 
     async def get_all_collections(self) -> list[CollectionResponse]:

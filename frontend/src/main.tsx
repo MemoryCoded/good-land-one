@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
+import { AdminProvider } from "./context/AdminProvider.tsx";
 
 import "@fontsource/orbitron/400.css";
 import "@fontsource/orbitron/700.css";
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <App />
+        <AdminProvider>
+          <App />
+        </AdminProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,

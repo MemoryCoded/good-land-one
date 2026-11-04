@@ -41,9 +41,9 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
           className="w-[30%] flex flex-col justify-center items-center cursor-pointer z-10 hover:bg-black/70 transition-colors pb-6 sm:pb-0"
           title="Toggle Header"
         >
-          <div className="flex flex-col items-center w-full px-2">
+          <div className="flex flex-col items-center w-full px-2 font-alternate">
             {titlePart1 && (
-              <h1 className="text-xs sm:text-sm font-bold text-white uppercase tracking-widest font-alternate">
+              <h1 className="text-xs sm:text-lg font-bold text-white uppercase tracking-widest font-alternate">
                 {titlePart1}
               </h1>
             )}
@@ -92,7 +92,7 @@ export function ManHeader({ title, date }: ManilaHeaderProps) {
                 Collections
               </Link>
               <button className="hover:text-black transition-colors drop-shadow-sm">
-                Seek
+                Explore
               </button>
             </nav>
           ) : (

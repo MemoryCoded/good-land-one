@@ -1,8 +1,9 @@
 import { useCollections } from "../hooks/useCollections";
 import { CollectionCard } from "../components/CollectionCard";
+import type { Photo } from "../types/photo";
 
-export function CollectionsPage() {
-  const { collections } = useCollections();
+export function CollectionsPage({ photos }: { photos: Photo[] }) {
+  const { collections } = useCollections(photos);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-12">

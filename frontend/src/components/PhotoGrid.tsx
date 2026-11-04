@@ -75,15 +75,6 @@ export function PhotoGrid({
     {} as Record<number, Photo[]>,
   );
 
-  const collectionNames: Record<number, string> = {
-    1: "Droneshots",
-    2: "Test Collection",
-    3: "Landscapes",
-    4: "Natural World",
-    5: "Sights",
-    6: "Bridges",
-  };
-
   // Observes collection-title
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -114,6 +105,13 @@ export function PhotoGrid({
     5: "grid-cols-3 sm:grid-cols-4 md:grid-cols-5",
   }[zoomLevel];
 
+  // Create a mapping of collection_id to its display order (1, 2, 3...)
+  const collectionOrderMap: Record<number, number> = {};
+  let currentOrder = 1;
+  Object.keys(groupedPhotos).forEach((id) => {
+    collectionOrderMap[Number(id)] = currentOrder++;
+  });
+
   return (
     <div className="max-w-7xl mx-auto pb-24">
       {Object.entries(groupedPhotos).map(([collectionId, collectionPhotos]) => {
@@ -124,7 +122,7 @@ export function PhotoGrid({
           year: "numeric",
         });
         const collectionName =
-          collectionNames[Number(collectionId)] || "Untitled";
+          firstPhoto.collection_name || `Collection ${collectionId}`;
 
         return (
           <div
@@ -148,7 +146,15 @@ export function PhotoGrid({
                     className="transition-all duration-300 ease-out hover:-translate-y-0.5
                                   hover:shadow-lg hover:shadow-gray/50"
                   >
-                    <PolaroidCard photo={photo} />
+                    <PolaroidCard
+                      photo={{
+                        ...photo,
+
+                        //Override the sort order with display order
+                        collection_sort_order:
+                          collectionOrderMap[photo.collection_id],
+                      }}
+                    />
                   </div>
                 </motion.div>
               ))}

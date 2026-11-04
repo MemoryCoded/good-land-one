@@ -5,7 +5,7 @@ import { InfoOverlay } from "./InfoOverlay";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGalleryStore } from "../store/useGalleryStore";
-
+import { getFullImageUrl } from "../utils/imageHelper";
 interface PhotoViewerProps {
   photos: Photo[];
   currentPhotoId: number;
@@ -117,7 +117,7 @@ export function PhotoViewer({
   if (!photo) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden select-none">
+    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 sm:p-8 overflow-hidden select-none h-dvh">
       {/* View B Close Button */}
       <button
         onClick={(e) => {
@@ -129,10 +129,11 @@ export function PhotoViewer({
         X Close
       </button>
 
-      {/* MAIN PHOTO */}
+      {/* MAIN PHOTO CONTAINER */}
       <div
         ref={mainPhotoRef}
-        className="w-full flex-1 min-h-0 justify-center flex items-center mt-12"
+        // FIXED: overflow-y-auto typo, and removed mt-12 to give more space
+        className="w-full flex-1 min-h-0 flex justify-center items-center overflow-y-auto no-scrollbar pt-12 pb-4"
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -148,102 +149,101 @@ export function PhotoViewer({
               if (offset.x < -50) nextPhoto();
               if (offset.x > 50) prevPhoto();
             }}
-            className="w-full max-w-4xl flex justify-center cursor-grab active:cursor-grabbing"
+            className="flex justify-center cursor-grab active:cursor-grabbing"
           >
             <PolaroidCard photo={photo} isViewB={true} />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* REEL STRIP */}
-      <div
-        ref={stripRef}
-        className="flex-shrink-0 my-6 w-full max-w-4xl flex justify-start gap-3 overflow-x-auto px-8 py-4 no-scrollbar z-50 scroll-smooth"
-      >
-        {/* Note: If you added the invisible spacers earlier, keep them here */}
-        {photos.map((p) => (
-          <div
-            key={p.id}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/photo/${p.id}`);
-            }}
-            className={`w-10 h-14 flex-shrink-0 cursor-pointer transition-all duration-300 ${
-              p.id === currentPhotoId
-                ? "ring-2 ring-white ring-offset-2 ring-offset-black scale-110 opacity-100 z-10 shadow-xl"
-                : "opacity-40 hover:opacity-80"
-            }`}
-          >
-            <img
-              src={p.thumbnail_small}
-              alt=""
-              className="w-full h-full object-cover rounded-sm pointer-events-none"
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* ACTION PILL & ARROWS */}
-      <div className="mt-8 flex items-center justify-center w-full max-w-full z-50 mb-4 px-2">
-        {/* Left Arrow */}
-        <button
-          onClick={prevPhoto}
-          disabled={currentIndex === 0}
-          className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-blue-600 transition-colors font-space text-lg mr-3"
+      {/* BOTTOM UI WRAPPER (Reel + Pill) */}
+      {/* flex-shrink-0 ensures this NEVER gets pushed off screen */}
+      <div className="flex-shrink-0 flex flex-col items-center w-full z-50">
+        {/* REEL STRIP */}
+        <div
+          ref={stripRef}
+          className="my-2 w-full max-w-4xl flex justify-start gap-3 overflow-x-auto px-8 py-2 no-scrollbar scroll-smooth"
         >
-          ←
-        </button>
-
-        {/* Floating Items */}
-        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full px-2 py-2">
-          <button
-            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-[10px] sm:text-sm whitespace-nowrap"
-            title="Share"
-          >
-            Links
-          </button>
-
-          <button
-            className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
-            title="Favorite"
-          >
-            ♡
-          </button>
-
-          {/* LABEL Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowInfo(true);
-            }}
-            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space font-bold text-[10px] sm:text-sm tracking-widest whitespace-nowrap"
-            title="Info"
-          >
-            LABEL
-          </button>
-
-          {/*Canvas button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); // Stop click from closing viewer
-              togglePhotoTheme(photo.id);
-            }}
-            className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
-          >
-            ▣
-          </button>
+          {photos.map((p) => (
+            <div
+              key={p.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/photo/${p.id}`);
+              }}
+              className={`w-10 h-14 flex-shrink-0 cursor-pointer transition-all duration-300 ${
+                p.id === currentPhotoId
+                  ? "ring-2 ring-white ring-offset-2 ring-offset-black scale-110 opacity-100 z-10 shadow-xl"
+                  : "opacity-40 hover:opacity-80"
+              }`}
+            >
+              <img
+                src={getFullImageUrl(p.thumbnail_small)}
+                alt=""
+                className="w-full h-full object-cover rounded-sm pointer-events-none"
+              />
+            </div>
+          ))}
         </div>
 
-        {/* Right Arrow */}
-        <button
-          onClick={nextPhoto}
-          disabled={currentIndex === photos.length - 1}
-          className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-red-600 transition-colors font-space text-lg ml-3"
-        >
-          →
-        </button>
+        {/* ACTION PILL & ARROWS */}
+        <div className="mt-2 flex items-center justify-center w-full max-w-full px-2 pb-2">
+          {/* Left Arrow */}
+          <button
+            onClick={prevPhoto}
+            disabled={currentIndex === 0}
+            className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-blue-600 transition-colors font-space text-lg mr-3"
+          >
+            ←
+          </button>
+
+          {/* Floating Items */}
+          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full px-2 py-2">
+            <button
+              className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-[10px] sm:text-sm whitespace-nowrap"
+              title="Share"
+            >
+              Links
+            </button>
+            <button
+              className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
+              title="Favorite"
+            >
+              ♡
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowInfo(true);
+              }}
+              className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space font-bold text-[10px] sm:text-sm tracking-widest whitespace-nowrap"
+              title="Info"
+            >
+              LABEL
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePhotoTheme(photo.id);
+              }}
+              className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
+            >
+              ▣
+            </button>
+          </div>
+
+          {/* Right Arrow */}
+          <button
+            onClick={nextPhoto}
+            disabled={currentIndex === photos.length - 1}
+            className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-red-600 transition-colors font-space text-lg ml-3"
+          >
+            →
+          </button>
+        </div>
       </div>
-      {/* Info Overlay*/}
+
+      {/* Info Overlay */}
       <AnimatePresence>
         {showInfo && (
           <InfoOverlay photo={photo} onClose={() => setShowInfo(false)} />
