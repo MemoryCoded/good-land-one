@@ -1,4 +1,5 @@
 import type { Photo } from "../types/photo";
+import { getFullImageUrl } from "../utils/imageHelper";
 
 export interface Collection {
   id: number;
@@ -26,7 +27,7 @@ export function useCollections(photos: Photo[]) {
       return {
         id: Number(id),
         name: firstPhoto.collection_name || `Collection ${id}`, // <-- USE REAL NAME
-        coverPhoto: firstPhoto.thumbnail_medium,
+        coverPhoto: getFullImageUrl(firstPhoto.thumbnail_medium),
         photoCount: photos.length,
         date: new Date(rawDate).toLocaleDateString("en-US", {
           month: "short",

@@ -30,7 +30,6 @@ export function PhotoViewer({
 
   const [showInfo, setShowInfo] = useState(false);
 
-  // 1. CALCULATE COLLECTION ORDER FOR NUMBERING
   const collectionOrderMap: Record<number, number> = {};
   let currentOrder = 1;
   const uniqueCollections = Array.from(
@@ -40,7 +39,6 @@ export function PhotoViewer({
     collectionOrderMap[id] = currentOrder++;
   });
 
-  // Override the photo with the correct display order
   const displayPhoto = photo
     ? {
         ...photo,
@@ -48,7 +46,6 @@ export function PhotoViewer({
       }
     : null;
 
-  // 2. Define functions
   const nextPhoto = () => {
     if (currentIndex < photos.length - 1)
       navigate(`/photo/${photos[currentIndex + 1].id}`);
@@ -57,7 +54,6 @@ export function PhotoViewer({
     if (currentIndex > 0) navigate(`/photo/${photos[currentIndex - 1].id}`);
   };
 
-  // 3. Auto-scroll the strip
   useEffect(() => {
     if (stripRef.current && currentIndex !== -1) {
       const timer = setTimeout(() => {
@@ -75,7 +71,6 @@ export function PhotoViewer({
     }
   }, [currentIndex]);
 
-  // 4. Keyboard Navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") {
@@ -94,7 +89,6 @@ export function PhotoViewer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentIndex, photos, navigate, onClose]);
 
-  // 5. Trackpad Swipe
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -117,11 +111,8 @@ export function PhotoViewer({
   if (!displayPhoto) return null;
 
   return (
-    // 1. Entire page scrolls naturally
     <div className="fixed inset-0 z-50 bg-black/95 overflow-y-auto select-none no-scrollbar">
-      {/* 2. min-h-screen keeps the footer pushed down if the photo is small */}
       <div className="min-h-screen flex flex-col justify-between p-4 sm:p-8">
-        {/* HEADER: Close Button */}
         <div className="flex-shrink-0 flex items-center h-12 z-50">
           <button
             onClick={onClose}
@@ -130,7 +121,7 @@ export function PhotoViewer({
             ✕ Close
           </button>
         </div>
-        {/* MAIN PHOTO */}
+
         <div
           ref={mainPhotoRef}
           className="w-full flex justify-center items-center py-4"
@@ -155,37 +146,45 @@ export function PhotoViewer({
             </motion.div>
           </AnimatePresence>
         </div>
-        {/* FOOTER: Reel Strip & Action Pill */}
-        <div className="flex-shrink-0 w-full flex flex-col items-center z-50 mt-4">
-          {/* REEL STRIP */}
-          <div
-            ref={stripRef}
-            className="w-full max-w-4xl flex justify-start gap-3 overflow-x-auto px-8 py-3 no-scrollbar scroll-smooth"
-          >
-            {photos.map((p) => (
-              <div
-                key={p.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/photo/${p.id}`);
-                }}
-                className={`w-10 h-14 flex-shrink-0 cursor-pointer transition-all duration-300 ${
-                  p.id === currentPhotoId
-                    ? "ring-2 ring-white ring-offset-2 ring-offset-black scale-110 opacity-100 z-10 shadow-xl"
-                    : "opacity-40 hover:opacity-80"
-                }`}
-              >
-                <img
-                  src={getFullImageUrl(p.thumbnail_small)}
-                  alt=""
-                  className="w-full h-full object-cover rounded-sm pointer-events-none"
-                />
-              </div>
-            ))}
-          </div>
+
+        {/* FOOTER: Reel Strip / Label Overlay & Action Pill */}
+        <div className="shrink-0 w-full flex flex-col items-center z-50 mt-4">
+          {/* CONDITIONAL RENDER: Reel Strip OR Label Overlay */}
+          {showInfo ? (
+            <InfoOverlay
+              photo={displayPhoto}
+              onClose={() => setShowInfo(false)}
+            />
+          ) : (
+            <div
+              ref={stripRef}
+              className="w-full max-w-4xl flex justify-start gap-3 overflow-x-auto px-8 py-3 no-scrollbar scroll-smooth"
+            >
+              {photos.map((p) => (
+                <div
+                  key={p.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/photo/${p.id}`);
+                  }}
+                  className={`w-10 h-14 flex-shrink-0 cursor-pointer transition-all duration-300 ${
+                    p.id === currentPhotoId
+                      ? "ring-2 ring-white ring-offset-2 ring-offset-black scale-110 opacity-100 z-10 shadow-xl"
+                      : "opacity-40 hover:opacity-80"
+                  }`}
+                >
+                  <img
+                    src={getFullImageUrl(p.thumbnail_small)}
+                    alt=""
+                    className="w-full h-full object-cover rounded-sm pointer-events-none"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* ACTION PILL */}
-          <div className="flex items-center justify-center w-full max-w-full px-2 pb-4">
+          <div className="flex items-center justify-center w-full max-w-full px-2 pb-4 mt-2">
             <button
               onClick={prevPhoto}
               disabled={currentIndex === 0}
@@ -207,16 +206,23 @@ export function PhotoViewer({
               >
                 ♡
               </button>
+
+              {/* LABEL TOGGLE BUTTON */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowInfo(true);
+                  setShowInfo(!showInfo);
                 }}
-                className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space font-bold text-[10px] sm:text-sm tracking-widest whitespace-nowrap"
+                className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border shadow-lg transition-colors font-space font-bold text-[10px] sm:text-sm tracking-widest whitespace-nowrap ${
+                  showInfo
+                    ? "bg-white text-black border-white"
+                    : "bg-zinc-800/80 text-white border-zinc-700/50 hover:bg-zinc-700"
+                }`}
                 title="Info"
               >
                 LABEL
               </button>
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -236,18 +242,8 @@ export function PhotoViewer({
               →
             </button>
           </div>
-        </div>{" "}
-        {/* <-- FIXED: Added missing closing div for Footer */}
+        </div>
       </div>
-
-      <AnimatePresence>
-        {showInfo && (
-          <InfoOverlay
-            photo={displayPhoto}
-            onClose={() => setShowInfo(false)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }

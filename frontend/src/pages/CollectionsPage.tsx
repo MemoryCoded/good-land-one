@@ -2,7 +2,7 @@ import { useCollections } from "../hooks/useCollections";
 import { CollectionCard } from "../components/CollectionCard";
 import type { Photo } from "../types/photo";
 
-export function CollectionsPage({ photos }: { photos: Photo[] }) {
+export function CollectionsPage({ photos = [] }: { photos?: Photo[] }) {
   const { collections } = useCollections(photos);
 
   return (
@@ -17,13 +17,20 @@ export function CollectionsPage({ photos }: { photos: Photo[] }) {
               `,
         }}
       >
-        All The Collections
+        All Collection Groups
       </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {collections.map((collection) => (
-          <CollectionCard key={collection.id} collection={collection} />
-        ))}
-      </div>
+
+      {collections.length === 0 ? (
+        <p className="text-gray-500 font-orbitron">
+          No public collections found.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {collections.map((collection) => (
+            <CollectionCard key={collection.id} collection={collection} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

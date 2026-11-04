@@ -35,7 +35,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
       {/* Folder Tab Visual (Top Left) */}
       <div
         // FIXED: Added rounded-tl-lg (matches parent curve), z-20 (sits above shadows), and adjusted border
-        className="absolute top-0 left-0 px-5 py-2.5 rounded-tl-m rounded-br-xl font-bold text-lg tracking-wide font-alternate text-gray-200 bg-linear-to-br from-blue-200 via-blue-400 to-blue-600 border-b border-r border-zinc-900/50 transform-gpu z-20"
+        className="absolute top-0 right-0 px-5 py-2.5 rounded-tl-m rounded-br-xl font-bold text-lg tracking-wide font-alternate text-gray-200 bg-linear-to-br from-blue-200 via-blue-600 to-blue-700 border-b border-r border-zinc-900/50 transform-gpu z-20"
         style={{
           boxShadow:
             "inset 0 2px 4px rgba(255,255,255,0.4), inset 0px -2px 2px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.3)",

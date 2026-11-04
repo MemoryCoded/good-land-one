@@ -1,6 +1,7 @@
 import { useAdminPhotos } from "../../hooks/useAdminPhotos";
 import { PolaroidCard } from "../../components/PolaroidCard";
 import { Link, useNavigate } from "react-router-dom";
+import { getFullImageUrl } from "../../utils/imageHelper";
 
 export function AdminLibraryPage() {
   const { data: photos, isLoading, isError } = useAdminPhotos();
@@ -16,6 +17,16 @@ export function AdminLibraryPage() {
         Failed to load.
       </div>
     );
+
+  // 1. CALCULATE DISPLAY ORDER FOR NUMBERING
+  const collectionOrderMap: Record<number, number> = {};
+  let currentOrder = 1;
+  const uniqueCollections = Array.from(
+    new Set(photos?.map((p) => p.collection_id) || []),
+  );
+  uniqueCollections.forEach((id) => {
+    collectionOrderMap[id] = currentOrder++;
+  });
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -36,8 +47,14 @@ export function AdminLibraryPage() {
       <div className="@container grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {photos?.map((photo) => (
           <div key={photo.id} className="relative group">
-            {/* The Polaroid Card */}
-            <PolaroidCard photo={photo} />
+            {/* Pass the overridden sort order to the card */}
+            <PolaroidCard
+              photo={{
+                ...photo,
+                collection_sort_order:
+                  collectionOrderMap[photo.collection_id] || 1,
+              }}
+            />
 
             {/* Status Badges */}
             <div className="absolute top-2 right-2 flex flex-col gap-1 z-10 pointer-events-none">
@@ -51,18 +68,20 @@ export function AdminLibraryPage() {
                   PUBLIC
                 </span>
               )}
+              {photo.is_uncategorized && (
+                <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
+                  UNCAT
+                </span>
+              )}
             </div>
 
-            {/* Hover Overlay for Admin Actions */}
+            {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-sm z-20">
               <button
                 onClick={() => navigate(`/admin/photo/${photo.id}`)}
                 className="bg-white text-black px-4 py-2 rounded font-bold text-sm w-3/4 hover:bg-zinc-200"
               >
                 Edit Info
-              </button>
-              <button className="bg-red-600 text-white px-4 py-2 rounded font-bold text-sm w-3/4 hover:bg-red-700">
-                Delete
               </button>
             </div>
           </div>

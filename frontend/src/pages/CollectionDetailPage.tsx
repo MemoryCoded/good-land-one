@@ -12,21 +12,9 @@ export function CollectionDetailPage({ photos }: { photos: Photo[] }) {
   const pageTheme = useGalleryStore((state) => state.pageTheme);
   const isDark = pageTheme === "Dark";
 
-  // Map collection name to ID (We will eventually replace this with a real backend query)
-  const collectionMap: Record<string, number> = {
-    Droneshots: 1,
-    "Test Collection": 2,
-    Landscapes: 3,
-    "Natural World": 4,
-    Sights: 5,
-    Bridges: 6,
-  };
-
-  const collectionId = collectionMap[name || ""];
-
   // Filter the REAL photos passed from App.tsx
   const collectionPhotos = photos.filter(
-    (photo) => photo.collection_id === collectionId,
+    (photo) => photo.collection_name === decodeURIComponent(name || ""),
   );
 
   return (
