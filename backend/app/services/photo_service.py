@@ -1,10 +1,13 @@
-from fastapi import Depends
+from fastapi import Depends, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
+import asyncio
+import os
 
 from app.database import get_db
 from app.repositories.photo_repository import PhotoRepository
 from app.repositories.collection_repository import CollectionRepository
 from app.schemas.photo import PhotoResponse
+from app.services.image_service import process_and_save_image
 
 
 class PhotoService:
@@ -78,6 +81,83 @@ class PhotoService:
             await self.db.refresh(updated_photo, ["collection"])
 
             return updated_photo
+        except Exception as e:
+            await self.db.rollback()
+            raise e
+
+    async def process_upload_batch(
+        self,
+        files: list[UploadFile],
+        collection_id: int | None = None,
+        is_archived: bool = False,
+        in_gallery: bool = False,
+        is_uncategorized: bool = True,
+    ) -> int:
+        collection = await self.collection_repo.get_by_id(collection_id)
+        if not collection:
+            raise ValueError(f"Collection {collection_id} does not exist.")
+
+        processed_data = []
+
+        for file in files:
+            raw = await file.read()
+            meta = await asyncio.to_thread(process_and_save_image, raw, file.filename)
+            processed_data.append((meta, len(raw)))
+
+        # Now, save all processed data to the database
+        try:
+            max_pos = await self.photo_repo.get_max_position(collection_id)
+
+            for meta, file_size in processed_data:
+                max_pos += 1
+
+                photo_data = {
+                    "collection_id": collection_id,
+                    "position": max_pos,
+                    "filename": meta["filename"],
+                    "thumbnail_small": meta["thumb_small"],
+                    "thumbnail_medium": meta["thumb_medium"],
+                    "thumbnail_large": meta["thumb_large"],
+                    "width": meta["width"],
+                    "height": meta["height"],
+                    "mime_type": meta["mime_type"],
+                    "size_bytes": file_size,
+                    "date_taken": meta.get("date_taken"),
+                    "is_archived": is_archived,
+                    "in_gallery": in_gallery,
+                    "is_uncategorized": is_uncategorized,
+                }
+
+                await self.photo_repo.create_photo(photo_data)
+
+            await self.db.commit()
+
+        except Exception as e:
+            await self.db.rollback()
+            raise e
+
+        return len(processed_data)
+
+    async def delete_photo(self, photo_id: int):
+        try:
+            photo = await self.photo_repo.delete_photo(photo_id)
+            if photo:
+                # Delete the associated files from local storage
+                files_to_delete = [
+                    photo.filename,
+                    photo.thumbnail_small,
+                    photo.thumbnail_medium,
+                    photo.thumbnail_large,
+                ]
+                for file_path in files_to_delete:
+                    if file_path in files_to_delete:
+                        if file_path:
+                            local_path = file_path.replace("/static/", "static/")
+                            if os.path.exists(local_path):
+                                os.remove(local_path)
+
+            await self.db.commit()
+            return photo
         except Exception as e:
             await self.db.rollback()
             raise e

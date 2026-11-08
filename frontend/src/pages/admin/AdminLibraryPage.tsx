@@ -1,7 +1,7 @@
 import { useAdminPhotos } from "../../hooks/useAdminPhotos";
 import { PolaroidCard } from "../../components/PolaroidCard";
 import { Link, useNavigate } from "react-router-dom";
-import { getFullImageUrl } from "../../utils/imageHelper";
+//import { getFullImageUrl } from "../../utils/imageHelper";
 
 export function AdminLibraryPage() {
   const { data: photos, isLoading, isError } = useAdminPhotos();

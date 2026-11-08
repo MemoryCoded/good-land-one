@@ -18,6 +18,7 @@ import { AdminLoginPage } from "./pages/admin/LoginPage";
 import { AdminLibraryPage } from "./pages/admin/AdminLibraryPage";
 import { AdminEditPage } from "./pages/admin/AdminEditPage"; // <-- Added
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AdminUploadPage } from "./pages/admin/AdminUploadPage"; // <-- Added
 
 function App() {
   // 1. FIXED: lowercase isError
@@ -96,6 +97,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminEditPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/*Added the Upload Route */}
+          <Route
+            path="/admin/upload"
+            element={
+              <ProtectedRoute>
+                <AdminUploadPage />
               </ProtectedRoute>
             }
           />

@@ -102,3 +102,9 @@ class PhotoRepository:
             .values(is_archived=True, in_gallery=False, is_uncategorized=False)
         )
         await self.db.execute(stmt)
+
+    async def delete_photo(self, photo_id: int) -> Photo | None:
+        photo = await self.get_photo_by_id(photo_id)
+        if photo:
+            await self.db.delete(photo)
+        return photo

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
+from datetime import datetime
 from app.api.deps import get_current_admin
 from app.services.photo_service import PhotoService
 from app.schemas.photo import PhotoResponse
@@ -60,6 +61,7 @@ class PhotoUpdate(BaseModel):
     is_uncategorized: bool | None = None
     collection_id: int | None = None
     new_collection_name: str | None = None
+    date_taken: datetime | None = None
 
 
 @router.get("/{photo_id}")
@@ -104,5 +106,17 @@ async def delete_collection(
         await service.collection_repo.delete_collection(collection_id)
 
         return {"message": "Collection Deleted"}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@router.delete("/{photo_id}")
+async def delete_photo(
+    photo_id: int,
+    service: PhotoService = Depends(PhotoService),
+):
+    try:
+        await service.delete_photo(photo_id)
+        return {"message": "Photo Deleted Successfully"}
     except Exception as e:
         raise HTTPException(500, str(e))

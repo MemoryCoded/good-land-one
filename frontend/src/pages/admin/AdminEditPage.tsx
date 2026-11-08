@@ -23,6 +23,7 @@ export function AdminEditPage() {
   // Single 'visibility' string prevents conflicting states
   const [formData, setFormData] = useState({
     title: "",
+    date_taken: "",
     description: "",
     artist_name: "",
     collection_id: 1,
@@ -54,6 +55,7 @@ export function AdminEditPage() {
 
         setFormData({
           title: data.title || "",
+          date_taken: data.date_taken || "",
           description: data.description || "",
           artist_name: data.artist_name || "",
           collection_id: data.collection_id,
@@ -127,6 +129,34 @@ export function AdminEditPage() {
     // Refresh and go back
     queryClient.invalidateQueries({ queryKey: ["adminPhotos"] });
     queryClient.invalidateQueries({ queryKey: ["photos"] });
+    navigate("/admin/library");
+  };
+
+  if (!photo)
+    return (
+      <div className="p-12 text-center text-xl font-orbitron">
+        Loading Photo...
+      </div>
+    );
+
+  // For deleting a photo
+  const handleDeletePhoto = async () => {
+    if (!window.confirm("Are you sure you want to delete this photo?")) return;
+
+    const res = await fetch(`http://127.0.0.1:8000/api/admin/photos/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      alert("Failed to delete photo.");
+      return;
+    }
+
+    // Force Data Refresh
+    queryClient.invalidateQueries({ queryKey: ["adminPhotos"] });
+    queryClient.invalidateQueries({ queryKey: ["photos"] });
+
     navigate("/admin/library");
   };
 
@@ -216,6 +246,22 @@ export function AdminEditPage() {
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
+              Date Taken
+            </label>
+            <input
+              type="date"
+              value={
+                formData.date_taken ? formData.date_taken.split("T")[0] : ""
+              }
+              onChange={(e) =>
+                setFormData({ ...formData, date_taken: e.target.value })
+              }
+              className="w-full border border-zinc-300 p-2 rounded focus:outline-none focus:border-black"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">
               Description
             </label>
             <textarea
@@ -273,6 +319,15 @@ export function AdminEditPage() {
               className="w-full bg-black text-white p-3 rounded font-bold hover:bg-zinc-800 transition-colors"
             >
               Save Changes
+            </button>
+          </div>
+          {/* DELETE PHOTO BUTTON */}
+          <div className="pt-8 mt-4">
+            <button
+              onClick={handleDeletePhoto}
+              className="w-full bg-red-600 text-white p-3 rounded font-bold hover:bg-red-700 transition-colors shadow-sm"
+            >
+              Delete Photo
             </button>
           </div>
         </div>
