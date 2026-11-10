@@ -1,9 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
-from datetime import datetime
 from app.api.deps import get_current_admin
 from app.services.photo_service import PhotoService
-from app.schemas.photo import PhotoResponse
-from pydantic import BaseModel
+from app.schemas.photo import PhotoResponse, PhotoUpdate
+
 
 """
 Admin Upload Route
@@ -49,19 +48,6 @@ async def get_admin_library(
 ):
     photos = await service.get_admin_library(skip=skip, limit=limit)
     return photos
-
-
-# Schema for what the frontend sends when editing
-class PhotoUpdate(BaseModel):
-    title: str | None = None
-    description: str | None = None
-    artist_name: str | None = None
-    is_archived: bool | None = None
-    in_gallery: bool | None = None
-    is_uncategorized: bool | None = None
-    collection_id: int | None = None
-    new_collection_name: str | None = None
-    date_taken: datetime | None = None
 
 
 @router.get("/{photo_id}")

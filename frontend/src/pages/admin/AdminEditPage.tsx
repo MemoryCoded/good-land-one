@@ -20,17 +20,20 @@ export function AdminEditPage() {
   const [collections, setCollections] = useState<CollectionOption[]>([]);
   const [newCollectionName, setNewCollectionName] = useState("");
 
-  // Single 'visibility' string prevents conflicting states
+  // Tracks how many photos exist in the current collection to limit the dropdown
+  const [maxPosition, setMaxPosition] = useState(1);
+
   const [formData, setFormData] = useState({
     title: "",
     date_taken: "",
     description: "",
     artist_name: "",
     collection_id: 1,
+    position: 1,
     visibility: "archive",
   });
 
-  // 1. Fetch real collections and the specific photo
+  // 1. Fetch collections, all photos (for max position), and the specific photo
   useEffect(() => {
     // Fetch collections for the dropdown
     fetch("http://127.0.0.1:8000/api/collections")
@@ -38,44 +41,64 @@ export function AdminEditPage() {
       .then((data) => setCollections(data))
       .catch((err) => console.error("Failed to load collections", err));
 
-    // Fetch the photo data
-    fetch(`http://127.0.0.1:8000/api/admin/photos/${id}`, {
+    // Fetch all photos to calculate the max position for the collection
+    fetch("http://127.0.0.1:8000/api/admin/photos/library?limit=100", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((data) => {
-        setPhoto(data);
+      .then((allPhotos: Photo[]) => {
+        // Now fetch the specific photo being edited
+        return fetch(`http://127.0.0.1:8000/api/admin/photos/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setPhoto(data);
 
-        // Map the 3 database booleans to our single visibility string
-        let vis = "archive";
-        if (!data.is_archived) {
-          if (data.is_uncategorized) vis = "uncat";
-          else if (data.in_gallery) vis = "gallery";
-        }
+            // Calculate how many photos are in THIS photo's collection
+            const photosInCollection = allPhotos.filter(
+              (p) => p.collection_id === data.collection_id,
+            ).length;
+            setMaxPosition(photosInCollection || 1);
 
-        setFormData({
-          title: data.title || "",
-          date_taken: data.date_taken || "",
-          description: data.description || "",
-          artist_name: data.artist_name || "",
-          collection_id: data.collection_id,
-          visibility: vis,
-        });
+            // Map the 3 database booleans to our single visibility string
+            let vis = "archive";
+            if (!data.is_archived) {
+              if (data.is_uncategorized) vis = "uncat";
+              else if (data.in_gallery) vis = "gallery";
+            }
+
+            setFormData({
+              title: data.title || "",
+              date_taken: data.date_taken || "",
+              description: data.description || "",
+              artist_name: data.artist_name || "",
+              collection_id: data.collection_id,
+              position: data.position,
+              visibility: vis,
+            });
+          });
       });
   }, [id, token]);
 
   // 2. Save changes to backend
   const handleSave = async () => {
-    // Map our single visibility string back to the 3 database booleans
     const payload = {
       title: formData.title,
       description: formData.description,
       artist_name: formData.artist_name,
       collection_id: formData.collection_id,
+      position: formData.position,
+
+      // Format date to ISO string if it exists
+      date_taken: formData.date_taken
+        ? new Date(formData.date_taken).toISOString()
+        : null,
+
       new_collection_name:
         newCollectionName.trim() !== "" ? newCollectionName.trim() : null,
 
-      // Mutually exclusive logic handled here:
+      // Mutually exclusive logic
       is_archived: formData.visibility === "archive",
       is_uncategorized: formData.visibility === "uncat",
       in_gallery: formData.visibility === "gallery",
@@ -97,10 +120,8 @@ export function AdminEditPage() {
       return;
     }
 
-    // Force Data Refresh
     queryClient.invalidateQueries({ queryKey: ["adminPhotos"] });
     queryClient.invalidateQueries({ queryKey: ["photos"] });
-
     navigate("/admin/library");
   };
 
@@ -126,22 +147,17 @@ export function AdminEditPage() {
       return;
     }
 
-    // Refresh and go back
     queryClient.invalidateQueries({ queryKey: ["adminPhotos"] });
     queryClient.invalidateQueries({ queryKey: ["photos"] });
     navigate("/admin/library");
   };
 
-  if (!photo)
-    return (
-      <div className="p-12 text-center text-xl font-orbitron">
-        Loading Photo...
-      </div>
-    );
-
-  // For deleting a photo
+  // 4. Delete Photo
   const handleDeletePhoto = async () => {
-    if (!window.confirm("Are you sure you want to delete this photo?")) return;
+    if (
+      !window.confirm("Are you sure you want to permanently delete this photo?")
+    )
+      return;
 
     const res = await fetch(`http://127.0.0.1:8000/api/admin/photos/${id}`, {
       method: "DELETE",
@@ -153,10 +169,8 @@ export function AdminEditPage() {
       return;
     }
 
-    // Force Data Refresh
     queryClient.invalidateQueries({ queryKey: ["adminPhotos"] });
     queryClient.invalidateQueries({ queryKey: ["photos"] });
-
     navigate("/admin/library");
   };
 
@@ -181,53 +195,71 @@ export function AdminEditPage() {
         </h2>
 
         <div className="space-y-4">
-          {/* COLLECTION DROPDOWN */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-bold text-gray-700">
-                Collection
-              </label>
+          {/* COLLECTION & POSITION ROW */}
+          <div className="flex gap-4 items-start">
+            <div className="flex-1">
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-bold text-gray-700">
+                  Collection
+                </label>
+                <button
+                  onClick={handleDeleteCollection}
+                  className="text-xs text-red-500 hover:text-red-700 font-bold transition-colors"
+                  title="Delete this collection"
+                >
+                  Delete Collection
+                </button>
+              </div>
 
-              {/* DELETE BUTTON */}
-              <button
-                onClick={handleDeleteCollection}
-                className="text-xs text-red-500 hover:text-red-700 font-bold transition-colors"
-                title="Delete this collection"
+              <select
+                value={formData.collection_id}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    collection_id: Number(e.target.value),
+                  });
+                  setNewCollectionName("");
+                }}
+                className="w-full border border-zinc-300 p-2 rounded focus:outline-none focus:border-black mb-2"
               >
-                Delete Collection
-              </button>
+                {collections.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="text"
+                placeholder="Or type a new collection name..."
+                value={newCollectionName}
+                onChange={(e) => setNewCollectionName(e.target.value)}
+                className="w-full border border-blue-300 p-2 rounded focus:outline-none focus:border-blue-500 text-sm bg-blue-50"
+              />
             </div>
 
-            <select
-              value={formData.collection_id}
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  collection_id: Number(e.target.value),
-                });
-                setNewCollectionName(""); // Clear new collection input if they pick an existing one
-              }}
-              className="w-full border border-zinc-300 p-2 rounded focus:outline-none focus:border-black mb-2"
-            >
-              {collections.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-
-            {/* INPUT FOR NEW COLLECTION */}
-            <input
-              type="text"
-              placeholder="Or type a new collection name..."
-              value={newCollectionName}
-              onChange={(e) => setNewCollectionName(e.target.value)}
-              className="w-full border border-blue-300 p-2 rounded focus:outline-none focus:border-blue-500 text-sm bg-blue-50"
-            />
-            <p className="text-[10px] text-gray-500 mt-1 ml-1">
-              * Typing a new name will create a new collection and move the
-              photo there.
-            </p>
+            {/* POSITION INPUT (RESTRICTED DROPDOWN) */}
+            <div className="w-24">
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Position
+              </label>
+              <select
+                value={formData.position}
+                onChange={(e) =>
+                  setFormData({ ...formData, position: Number(e.target.value) })
+                }
+                className="w-full border border-zinc-300 p-2 rounded focus:outline-none focus:border-black"
+              >
+                {/* Only show numbers from 1 up to the total number of photos in this collection */}
+                {Array.from({ length: maxPosition }, (_, i) => i + 1).map(
+                  (num) => (
+                    <option key={num} value={num}>
+                      {num}
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
           </div>
 
           <div>
@@ -288,7 +320,6 @@ export function AdminEditPage() {
             />
           </div>
 
-          {/* VISIBILITY DROPDOWN */}
           <div className="pt-4 border-t border-zinc-200 mt-6">
             <h3 className="font-bold mb-3 text-sm text-zinc-500 uppercase tracking-widest">
               Visibility Settings
@@ -321,13 +352,13 @@ export function AdminEditPage() {
               Save Changes
             </button>
           </div>
-          {/* DELETE PHOTO BUTTON */}
+
           <div className="pt-8 mt-4">
             <button
               onClick={handleDeletePhoto}
               className="w-full bg-red-600 text-white p-3 rounded font-bold hover:bg-red-700 transition-colors shadow-sm"
             >
-              Delete Photo
+              Delete Photo Permanently
             </button>
           </div>
         </div>

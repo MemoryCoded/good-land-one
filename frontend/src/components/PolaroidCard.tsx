@@ -37,8 +37,8 @@ export function PolaroidCard({
         ${theme.shadow}
         ${
           isViewB
-            ? // 1. Max height of 80vh. Overflow hidden prevents the image from covering the text.
-              "w-fit max-w-[90vw] max-h-[80vh] p-3 pb-16"
+            ? // CONSTRAINED LAYOUT
+              "w-fit max-w-[90vw] max-h-[70vh] p-3 pb-16"
             : "@container w-full rounded-sm p-2 pb-12 sm:pb-14"
         }
       `}
@@ -46,9 +46,9 @@ export function PolaroidCard({
       <img
         src={imageUrl}
         alt={photo.title || "Gallery photo"}
-        // 2. Max height is calc(80vh - 6rem) to account for the 4rem bottom padding + top padding.
+        // CONSTRAINED HEIGHT
         className={`object-contain ${
-          isViewB ? "max-h-[calc(80vh-6rem)] w-auto mx-auto" : "w-full h-auto"
+          isViewB ? "max-h-[60vh] w-auto mx-auto" : "w-full h-auto"
         }`}
         loading="lazy"
         draggable={false}

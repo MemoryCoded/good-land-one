@@ -27,3 +27,17 @@ class PhotoResponse(BaseModel):
     is_archived: bool
     in_gallery: bool
     is_uncategorized: bool
+
+
+# Schema for what the frontend sends when editing
+class PhotoUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    artist_name: str | None = None
+    is_archived: bool | None = None
+    in_gallery: bool | None = None
+    is_uncategorized: bool | None = None
+    collection_id: int | None = None
+    position: int | None = None
+    new_collection_name: str | None = None
+    date_taken: datetime | None = None

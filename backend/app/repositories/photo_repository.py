@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, update  # <-- Added 'update' here
+from sqlalchemy import select, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -25,6 +25,8 @@ class PhotoRepository:
             .where(Photo.is_archived.is_(False))  # Not in Archive
             .where(Photo.in_gallery.is_(True))  # Must be in Gallery
             .where(Photo.is_uncategorized.is_(False))  # NOT in UNCAT
+            # SORT: Lowest collection first, then lowest position first
+            .order_by(Photo.collection_id, Photo.position)
             .limit(limit)
         )
         result = await self.db.execute(stmt)
@@ -56,7 +58,8 @@ class PhotoRepository:
         stmt = (
             select(Photo)
             .options(joinedload(Photo.collection))
-            .order_by(Photo.uploaded_at.desc())
+            # SORT: Lowest collection first, then lowest position first
+            .order_by(Photo.collection_id, Photo.position)
             .offset(skip)
             .limit(limit)
         )
@@ -69,12 +72,49 @@ class PhotoRepository:
             return None
 
         new_collection_id = update_data.get("collection_id")
+        new_position = update_data.get("position")
+
+        # 1. Handle Collection Change
         if new_collection_id and new_collection_id != photo.collection_id:
             max_pos = await self.get_max_position(new_collection_id)
-            update_data["position"] = max_pos + 1
+            photo.collection_id = new_collection_id
+            photo.position = new_position if new_position is not None else max_pos + 1
 
+        # 2. Handle Position Change (SWAP)
+        elif new_position is not None and new_position != photo.position:
+            current_pos = photo.position
+            target_pos = new_position
+
+            # Find the photo currently occupying the target position
+            stmt = select(Photo).where(
+                Photo.collection_id == photo.collection_id, Photo.position == target_pos
+            )
+            existing_photo = (await self.db.execute(stmt)).scalar_one_or_none()
+
+            if existing_photo:
+                # Step A: Move the existing photo to a temporary safe position
+                existing_photo.position = -1
+                await self.db.flush()
+
+                # Step B: Move the current photo to the target position
+                photo.position = target_pos
+                await self.db.flush()
+
+                # Step C: Move the existing photo to the current photo's old position
+                existing_photo.position = current_pos
+                await self.db.flush()
+
+                # Remove position from the update dictionary so it doesn't overwrite what we just did
+                update_data.pop("position", None)
+            else:
+                # Safety net: Cap at max position if they try to go to an invalid number
+                max_pos = await self.get_max_position(photo.collection_id)
+                photo.position = min(target_pos, max_pos)
+
+        # 3. Apply other metadata
         for key, value in update_data.items():
-            setattr(photo, key, value)
+            if key not in ["collection_id", "position"]:
+                setattr(photo, key, value)
 
         await self.db.flush()
         return await self.get_photo_by_id(photo_id)
@@ -85,6 +125,8 @@ class PhotoRepository:
             .options(joinedload(Photo.collection))
             .where(Photo.is_archived.is_(False))
             .where(Photo.is_uncategorized.is_(True))
+            # SORT: Lowest collection first, then lowest position first
+            .order_by(Photo.collection_id, Photo.position)
             .limit(limit)
         )
         result = await self.db.execute(stmt)

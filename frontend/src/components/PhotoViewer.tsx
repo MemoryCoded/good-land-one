@@ -111,9 +111,10 @@ export function PhotoViewer({
   if (!displayPhoto) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 overflow-y-auto select-none no-scrollbar">
+    <div className="fixed inset-0 z-50 bg-black/95 select-none no-scrollbar overflow-hidden">
       <div className="min-h-screen flex flex-col justify-between p-4 sm:p-8">
-        <div className="flex-shrink-0 flex items-center h-12 z-50">
+        {/* HEADER */}
+        <div className="shrink-0 flex items-center h-12 z-50">
           <button
             onClick={onClose}
             className="text-white/50 hover:text-white transition-colors text-sm font-bold tracking-widest uppercase font-space"
@@ -122,9 +123,10 @@ export function PhotoViewer({
           </button>
         </div>
 
+        {/* MAIN PHOTO */}
         <div
           ref={mainPhotoRef}
-          className="w-full flex justify-center items-center py-4"
+          className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex justify-center items-center py-4"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -183,65 +185,63 @@ export function PhotoViewer({
             </div>
           )}
 
-          {/* ACTION PILL */}
-          <div className="flex items-center justify-center w-full max-w-full px-2 pb-4 mt-2">
-            <button
-              onClick={prevPhoto}
-              disabled={currentIndex === 0}
-              className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-blue-600 transition-colors font-space text-lg mr-3"
-            >
-              ←
-            </button>
-
-            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full px-2 py-2">
+          {/* ACTION PILL (Hidden when Label is open) */}
+          {!showInfo && (
+            <div className="flex items-center justify-center w-full max-w-full px-2 pb-4 mt-auto">
               <button
-                className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-[10px] sm:text-sm whitespace-nowrap"
-                title="Share"
+                onClick={prevPhoto}
+                disabled={currentIndex === 0}
+                className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-blue-600 transition-colors font-space text-lg mr-3"
               >
-                Links
-              </button>
-              <button
-                className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
-                title="Favorite"
-              >
-                ♡
+                ←
               </button>
 
-              {/* LABEL TOGGLE BUTTON */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowInfo(!showInfo);
-                }}
-                className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border shadow-lg transition-colors font-space font-bold text-[10px] sm:text-sm tracking-widest whitespace-nowrap ${
-                  showInfo
-                    ? "bg-white text-black border-white"
-                    : "bg-zinc-800/80 text-white border-zinc-700/50 hover:bg-zinc-700"
-                }`}
-                title="Info"
-              >
-                LABEL
-              </button>
+              <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full px-2 py-2">
+                <button
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors font-space tracking-widest uppercase text-[10px] sm:text-sm whitespace-nowrap"
+                  title="Share"
+                >
+                  Links
+                </button>
+                <button
+                  className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
+                  title="Favorite"
+                >
+                  ♡
+                </button>
+
+                {/* LABEL TOGGLE BUTTON */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowInfo(!showInfo);
+                  }}
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border shadow-lg transition-colors font-space font-bold text-[10px] sm:text-sm tracking-widest whitespace-nowrap bg-zinc-800/80 text-white border-zinc-700/50 hover:bg-zinc-700"
+                  title="Info"
+                >
+                  LABEL
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePhotoTheme(displayPhoto.id);
+                  }}
+                  className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
+                >
+                  ▣
+                </button>
+              </div>
 
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  togglePhotoTheme(displayPhoto.id);
-                }}
-                className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg hover:bg-zinc-700 transition-colors text-lg sm:text-xl"
+                onClick={nextPhoto}
+                disabled={currentIndex === photos.length - 1}
+                className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-red-600 transition-colors font-space text-lg ml-3"
               >
-                ▣
+                →
               </button>
             </div>
-
-            <button
-              onClick={nextPhoto}
-              disabled={currentIndex === photos.length - 1}
-              className="hidden sm:flex w-11 h-11 items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-white border border-zinc-700/50 shadow-lg disabled:opacity-30 hover:bg-red-600 transition-colors font-space text-lg ml-3"
-            >
-              →
-            </button>
-          </div>
+          )}
         </div>
       </div>
     </div>
